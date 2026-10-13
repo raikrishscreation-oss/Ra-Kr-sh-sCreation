@@ -89,6 +89,8 @@ textarea{resize:vertical;min-height:60px}
 .sheet .sum td:last-child{text-align:right;font-weight:500}
 .sheet .sum tr.gt td{background:var(--green);color:#fff;font-weight:600;font-size:16px;padding:10px 12px}
 .sheet .sum tr.gt td:last-child{color:#f0d588}
+.sheet .sum tr.dc td{color:#b3261e;font-weight:600}
+.sheet .sum tr.sv td{background:none;text-align:right;font-size:11.5px;color:#0b6b3f;font-weight:600;padding:6px 2px 0}
 .sheet .foot{margin:auto 76px 0;padding:14px 24px 84px;border-top:3px solid var(--gold);background:none;display:flex;gap:24px;align-items:center;page-break-inside:avoid;break-inside:avoid}
 .sheet .qr{width:150px;text-align:center;flex:none}
 .sheet .qr .q{width:150px;height:150px;border:2px solid var(--gold);border-radius:12px;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:4px}
@@ -114,7 +116,7 @@ textarea{resize:vertical;min-height:60px}
   .card.pv{border:0;box-shadow:none;padding:0;margin:0;background:none}
   .preview-wrap{height:auto!important;background:none;overflow:visible}
   #sheetHost{transform:none!important;width:210mm}
-  .sheet{width:210mm;min-height:297mm}
+  .sheet{width:210mm;min-height:296mm}
 }
 </style>
 </head>
@@ -139,6 +141,7 @@ textarea{resize:vertical;min-height:60px}
           <input id="serial" type="number" min="1" style="width:90px" title="Serial number">
         </div>
       </div>
+      <div><label>Order ID</label><input id="orderId" type="text" placeholder="Optional"></div>
     </div>
     <div style="margin-top:12px"><label>Customer address</label><textarea id="cAddr" placeholder="Address, city, state, pincode"></textarea></div>
   </div>
@@ -150,11 +153,13 @@ textarea{resize:vertical;min-height:60px}
     <div class="actions" style="margin-top:6px">
       <button class="btn light" id="addItem"><i class="fa-solid fa-plus"></i> Add item</button>
     </div>
-    <div class="grid" style="margin-top:16px;max-width:300px">
+    <div class="grid" style="margin-top:16px;max-width:600px">
       <div><label>Delivery charge (₹)</label><input id="delivery" type="number" min="0" inputmode="numeric" placeholder="0"></div>
+      <div><label>Discount (%)</label><input id="discount" type="number" min="0" max="100" step="any" inputmode="decimal" placeholder="0"></div>
     </div>
     <div class="totals"><table>
       <tr><td>Subtotal</td><td id="tSub">₹0</td></tr>
+      <tr id="tDiscRow" style="display:none"><td>Discount (<span id="tDiscPct">0</span>%)</td><td id="tDisc">-₹0</td></tr>
       <tr><td>Delivery charge</td><td id="tDel">₹0</td></tr>
       <tr class="gt"><td>Total</td><td id="tGrand">₹0</td></tr>
     </table></div>
@@ -198,7 +203,7 @@ textarea{resize:vertical;min-height:60px}
 <script>
 /* ================= CONFIG ================= */
 // 1) Paste your deployed Apps Script Web App URL here (ends with /exec)
-const API_URL = 'https://script.google.com/macros/s/AKfycbz_PT4DacyBOnQTYLep_vTzP4nb__uBzaCwDAuL-vsbyD-NbKQchvDz6u9iDKmk2rs/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbzBzIJphF9_M7ZG1mkxzIhlFYNuDsEDp7DPDHGWxvJbGF5_6Uo0TZpsPiQ5eerENOU/exec';
 
 // 2) Fallback for reading products if API_URL is empty (sheet must be "Anyone with link – Viewer")
 const SHEET_ID = '1sFavnKzitQdsUkrV2keQw9Ge2JV9Sg8Wn-XqukL1tq4';
@@ -362,7 +367,9 @@ function totals() {
   const sub = items.reduce((s, i) => s + i.qty * i.rate, 0);
   const del = Math.max(0, num($('delivery').value));
   const cost = items.reduce((s, i) => s + i.qty * i.cost, 0);
-  return { sub, del, grand: sub + del, cost, profit: sub - cost };
+  const pct = Math.min(100, Math.max(0, num($('discount').value)));
+  const disc = Math.round(sub * pct) / 100;
+  return { sub, del, pct, disc, grand: sub - disc + del, cost, profit: sub - disc - cost };
 }
 const fmtDate = d => d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) + ', ' + d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
 const validItems = () => items.filter(i => (i.text || i.name) && i.qty > 0);
@@ -380,7 +387,7 @@ function docHTML() {
     <div class="band">
       <img src="${esc(logoSrc)}" crossorigin="anonymous" alt="">
       <div class="brand"><h2>RaiKrish's Collection</h2><p>Where Creativity Meets Craft</p></div>
-      <div class="tag"><h3>INVOICE</h3><span>${invNo()}</span></div>
+      <div class="tag"><h3>INVOICE</h3><span>${invNo()}</span>${$('orderId').value.trim() ? `<span>Order ID: ${esc($('orderId').value.trim())}</span>` : ''}</div>
     </div>
     <div class="goldline"></div>
     <div class="body">
@@ -393,6 +400,7 @@ function docHTML() {
         </div>
         <div class="box" style="flex:0 0 245px"><h4>Invoice details</h4>
           <p><span style="color:#6b7a72">Invoice no</span><br><b style="font-size:15px;color:#0b3d29">${invNo()}</b></p>
+          ${$('orderId').value.trim() ? `<p><span style="color:#6b7a72">Order ID</span><br><b>${esc($('orderId').value.trim())}</b></p>` : ''}
           <p><span style="color:#6b7a72">Date</span><br>${fmtDate(invDate)}</p>
         </div>
       </div>
@@ -402,8 +410,10 @@ function docHTML() {
       </table>
       <div class="sum"><table>
         <tr><td>Subtotal</td><td>${inr(t.sub)}</td></tr>
+        ${t.disc > 0 ? `<tr class="dc"><td>Discount (${t.pct}%)</td><td>- ${inr(t.disc)}</td></tr>` : ''}
         <tr><td>Delivery charge</td><td>${inr(t.del)}</td></tr>
         <tr class="gt"><td>Total</td><td>${inr(t.grand)}</td></tr>
+        ${t.disc > 0 ? `<tr class="sv"><td colspan="2">You saved ${inr(t.disc)} (${t.pct}% off)</td></tr>` : ''}
       </table></div>
     </div>
     <div class="foot">
@@ -421,7 +431,8 @@ function docHTML() {
 }
 function renderDoc() {
   const t = totals();
-  $('tSub').textContent = inr(t.sub); $('tDel').textContent = inr(t.del); $('tGrand').textContent = inr(t.grand);
+  $('tSub').textContent = inr(t.sub); $('tDel').textContent = inr(t.del);
+  $('tDiscRow').style.display = t.disc > 0 ? '' : 'none'; $('tDiscPct').textContent = t.pct; $('tDisc').textContent = '-' + inr(t.disc); $('tGrand').textContent = inr(t.grand);
   $('tCost').textContent = Math.round(t.cost).toLocaleString('en-IN'); $('tProfit').textContent = Math.round(t.profit).toLocaleString('en-IN');
   $('sheetHost').innerHTML = docHTML(); fit();
 }
@@ -430,7 +441,7 @@ function fit() {
   host.style.transform = `scale(${s})`; $('pvWrap').style.height = (host.offsetHeight * s) + 'px';
 }
 window.addEventListener('resize', fit);
-['cName', 'cPhone', 'cEmail', 'cAddr', 'delivery', 'serial'].forEach(id => $(id).addEventListener('input', renderDoc));
+['cName', 'cPhone', 'cEmail', 'cAddr', 'delivery', 'discount', 'orderId', 'serial'].forEach(id => $(id).addEventListener('input', renderDoc));
 
 /* ================= SAVE TO SHEET ================= */
 async function saveInvoice() {
@@ -439,6 +450,7 @@ async function saveInvoice() {
     invoiceNo: invNo(), dateText: fmtDate(invDate), iso: invDate.toISOString(),
     name: $('cName').value.trim(), phone: $('cPhone').value.trim(), email: $('cEmail').value.trim(), address: $('cAddr').value.trim(),
     delivery: Math.max(0, num($('delivery').value)),
+    orderId: $('orderId').value.trim(), discountPct: totals().pct,
     items: validItems().map(i => ({ pid: i.pid, name: i.pid ? i.name : i.text, desc: i.desc, qty: i.qty, rate: i.rate, cost: i.cost }))
   };
   try {
@@ -475,6 +487,10 @@ $('btnPdf').onclick = async () => {
   const holder = document.createElement('div');
   holder.style.cssText = 'position:fixed;left:-10000px;top:0;width:794px;background:#fff';
   holder.innerHTML = docHTML(); document.body.appendChild(holder);
+  const sh = holder.firstElementChild;
+  sh.style.minHeight = '1118px';                 // a hair under A4 (1123px) so no blank 2nd page
+  sh.style.wordSpacing = '1.5px';                // keeps spaces between words in the PDF
+  sh.style.textRendering = 'geometricPrecision';
   try {
     if (document.fonts && document.fonts.ready) await document.fonts.ready;
     const name = invNo() + '_' + ($('cName').value.trim().replace(/[^\w]+/g, '_') || 'customer') + '.pdf';
@@ -482,7 +498,7 @@ $('btnPdf').onclick = async () => {
       margin: 0, filename: name, image: { type: 'jpeg', quality: 0.98 },
       html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', scrollX: 0, scrollY: 0 },
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-      pagebreak: { mode: ['css', 'legacy'], avoid: ['tr', '.foot'] }
+      pagebreak: { mode: ['css'], avoid: ['tr', '.foot'] }
     }).from(holder.firstElementChild).save();
     markUsed(); say('PDF saved: ' + name, 'ok');
   } catch (e) { say('PDF failed: ' + e.message, 'err'); }
@@ -491,7 +507,7 @@ $('btnPdf').onclick = async () => {
 $('btnSync').onclick = () => { syncProducts(); refreshSerial(); };
 $('btnNew').onclick = () => {
   if (!confirm('Start a new invoice? Current details will be cleared.')) return;
-  ['cName', 'cPhone', 'cEmail', 'cAddr', 'delivery'].forEach(id => $(id).value = '');
+  ['cName', 'cPhone', 'cEmail', 'cAddr', 'delivery', 'discount', 'orderId'].forEach(id => $(id).value = '');
   items = [blank()]; invDate = new Date(); renderRows(); refreshSerial();
 };
 
