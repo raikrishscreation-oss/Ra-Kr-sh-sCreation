@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -99,6 +99,13 @@ main{max-width:720px;margin:0 auto;padding:14px}
 .item .amt{font-weight:700;white-space:nowrap}
 .total{display:flex;justify-content:space-between;font-weight:700;font-size:17px;padding-top:10px;margin-top:4px;border-top:2px solid var(--green)}
 
+.wabtn{display:block;text-decoration:none;color:var(--ink);border:2px solid #1f9d55;border-radius:12px;padding:10px 12px;margin-bottom:8px;background:#f2fbf5}
+.wabtn:last-child{margin-bottom:0}
+.wabtn:active{background:#dff3e6}
+.wabtn b{display:block;color:#17703d;font-size:15px}
+.wabtn span{display:block;font-size:13.5px;color:var(--muted);margin-top:3px}
+.panel h3 .fa-whatsapp{color:#1f9d55}
+
 /* image viewer */
 .viewer{position:fixed;inset:0;z-index:50;background:rgba(10,20,15,.94);display:none;align-items:center;justify-content:center;padding:16px}
 .viewer.on{display:flex}
@@ -177,14 +184,14 @@ async function load(){
   const b=$('#refresh'); b.classList.add('spin');
   try{
     const d = await api({action:'data'});
-    if(!d.ok){ if(d.error==='bad_key'){ KEY=''; localStorage.removeItem('rk_admin_key'); return showLogin('PIN thik noy'); } throw new Error(d.error); }
+    if(!d.ok){ if(d.error==='bad_key'){ KEY=''; localStorage.removeItem('rk_admin_key'); return showLogin('Incorrect PIN'); } throw new Error(d.error); }
     DATA.orders = d.orders.slice().reverse();               // newest first
     DATA.items = d.items;
     DATA.images = {};
     d.images.forEach(r=>{ DATA.images[String(r['Product ID']).trim()] = imgUrl(r['Image Link']); });
     route();
   }catch(e){
-    app.innerHTML = `<div class="empty"><i class="fa-solid fa-triangle-exclamation"></i><br>Data load hoyni.<br><small>${esc(e.message||e)}</small><br><br><button class="back" style="width:auto;padding:0 18px" onclick="load()">Abar chesta korun</button></div>`;
+    app.innerHTML = `<div class="empty"><i class="fa-solid fa-triangle-exclamation"></i><br>Could not load data.<br><small>${esc(e.message||e)}</small><br><br><button class="back" style="width:auto;padding:0 18px" onclick="load()">Try again</button></div>`;
   }finally{ b.classList.remove('spin'); }
 }
 
@@ -194,7 +201,7 @@ function showLogin(msg){
     <img src="https://drive.google.com/thumbnail?id=1zqOu2NPiGQ4MZT6rxNwbzn_7csTxUQpD&sz=s400" alt="">
     <h2 style="margin-top:10px">Admin PIN</h2>
     <input id="pin" type="password" inputmode="numeric" autocomplete="current-password" placeholder="PIN">
-    <button id="pinGo">Dhukun</button>
+    <button id="pinGo">Sign in</button>
     ${msg?`<div class="err">${esc(msg)}</div>`:''}
   </div>`;
   const go=()=>{ KEY=$('#pin').value.trim(); if(!KEY) return; localStorage.setItem('rk_admin_key',KEY); app.innerHTML='<div class="loading"><i class="fa-solid fa-spinner fa-spin"></i></div>'; load(); };
@@ -216,9 +223,9 @@ function cardHTML(o){
 function viewHome(){
   app.innerHTML = `
     <div class="search"><span class="pre">RK-</span>
-      <input id="q" inputmode="numeric" autocomplete="off" placeholder="261011-003 ba shesh digit" aria-label="Order ID search">
+      <input id="q" inputmode="numeric" autocomplete="off" placeholder="261011-003 or last digits" aria-label="Order ID search">
       <button class="go" id="qclear" aria-label="Clear" style="display:none"><i class="fa-solid fa-xmark"></i></button></div>
-    <div class="hint">Shudhu shesh er digit likhlei hobe, jemon 003</div>
+    <div class="hint">Type just the last digits, for example 003</div>
     <div id="results"></div>
     <div class="grid" id="grid">
       ${STATUSES.map(s=>{const k=s.toLowerCase();return `<a class="sbtn s-${k}" href="#s/${k}"><span class="n">${countOf(k)}</span><i class="fa-solid ${ICONS[k]}"></i><b>${s}</b></a>`}).join('')}
@@ -230,7 +237,7 @@ function viewHome(){
     if(!v){ res.innerHTML=''; grid.style.display=''; return; }
     grid.style.display='none';
     const hits = DATA.orders.filter(o=>idNorm(o['Order ID']).replace(/^rk/,'').endsWith(v));
-    res.innerHTML = hits.length ? hits.map(cardHTML).join('') : '<div class="empty">Ei ID-r kono order paoa jayni</div>';
+    res.innerHTML = hits.length ? hits.map(cardHTML).join('') : '<div class="empty">No order found with this ID</div>';
     if(hits.length===1 && v.length>=3) location.hash = '#o/'+encodeURIComponent(hits[0]['Order ID']);
   };
   clr.onclick=()=>{ q.value=''; q.oninput(); q.focus(); };
@@ -241,12 +248,12 @@ function viewList(st){
   const name = st.charAt(0).toUpperCase()+st.slice(1);
   app.innerHTML = `<div class="pagehead"><button class="back" onclick="history.back()" aria-label="Back"><i class="fa-solid fa-arrow-left"></i></button>
     <h2>${name}</h2><span class="cnt">${list.length} order</span></div>
-    ${list.length?list.map(cardHTML).join(''):'<div class="empty">Ei status-e kono order nei</div>'}`;
+    ${list.length?list.map(cardHTML).join(''):'<div class="empty">No orders in this status</div>'}`;
 }
 
 function viewOrder(id){
   const o = DATA.orders.find(x=>String(x['Order ID']).trim()===id);
-  if(!o){ app.innerHTML=`<div class="pagehead"><button class="back" onclick="history.back()"><i class="fa-solid fa-arrow-left"></i></button><h2>Order paoa jayni</h2></div>`; return; }
+  if(!o){ app.innerHTML=`<div class="pagehead"><button class="back" onclick="history.back()"><i class="fa-solid fa-arrow-left"></i></button><h2>Order not found</h2></div>`; return; }
   const items = DATA.items.filter(i=>String(i['Order ID']).trim()===id);
   const st = norm(o['Status']);
   const opts = STATUSES.slice(); if(st && !opts.some(s=>s.toLowerCase()===st)) opts.unshift(o['Status']);
@@ -259,10 +266,11 @@ function viewOrder(id){
     <div class="panel"><h3>Status</h3>
       <select class="status-sel" id="stsel">${opts.map(s=>`<option ${norm(s)===st?'selected':''}>${esc(s)}</option>`).join('')}</select>
     </div>
-    <div class="panel"><h3>Grahok</h3>
+    <div class="panel"><h3>Customer</h3>
       ${R('Name',o['Name'])}${R('Phone',o['Phone'])}${R('Email',o['Email'])}${R('Address',addr)}${R('Date',o['Date & Time'])}${R('Note',o['Note'])}
-      ${ph?`<div class="actions"><a class="a-call" href="tel:${ph}"><i class="fa-solid fa-phone"></i> Call</a><a class="a-wa" href="https://wa.me/${wa}" target="_blank" rel="noopener"><i class="fa-brands fa-whatsapp"></i> WhatsApp</a></div>`:''}
+      ${ph?`<div class="actions"><a class="a-call" href="tel:${ph}"><i class="fa-solid fa-phone"></i> Call</a></div>`:''}
     </div>
+    <div class="panel" id="wapanel"></div>
     <div class="panel"><h3>Items (${items.length})</h3>
       ${items.length?items.map(i=>{
         const pid=String(i['Product ID']).trim(), im=DATA.images[pid];
@@ -271,19 +279,48 @@ function viewOrder(id){
           <div class="info"><div class="pn">${esc(i['Product Name'])}</div>
             <div class="sub">${esc(pid)}${i['Type']?' · '+esc(i['Type']):''}</div>
             <div class="sub">${esc(i['Qty'])} × ${rupee(i['Unit Price (₹)'])}</div></div>
-          <div class="amt">${rupee(i['Amount (₹)'])}</div></div>`;}).join(''):'<div class="empty" style="padding:14px">Item paoa jayni</div>'}
+          <div class="amt">${rupee(i['Amount (₹)'])}</div></div>`;}).join(''):'<div class="empty" style="padding:14px">No items found</div>'}
       <div class="total"><span>Total · ${esc(o['Total Qty'])} pcs</span><span>${rupee(o['Total (₹)'])}</span></div>
     </div>`;
+  renderWA(o,wa);
   app.querySelectorAll('.thumb[data-full]').forEach(t=>t.onclick=()=>openViewer(t.dataset.full,t.dataset.cap));
   $('#stsel').onchange=async e=>{
     const sel=e.target, prev=o['Status'], val=sel.value; sel.disabled=true;
     try{
       const r=await api({action:'update',id:id,status:val});
       if(!r.ok) throw new Error(r.error);
-      o['Status']=val; toast('Status: '+val);
-    }catch(err){ sel.value=prev; toast('Update hoyni, abar chesta korun',true); }
+      o['Status']=val; renderWA(o,wa); toast('Status: '+val);
+    }catch(err){ sel.value=prev; toast('Update failed, please try again',true); }
     sel.disabled=false;
   };
+}
+
+
+/* ---------- WhatsApp ready-made messages ---------- */
+const WA_INTRO = "This is RaiKrish's Collection. ";
+const WA_MSGS = {
+  new: [
+    {label:'Work will begin shortly', text:'Work on your order will take a little time to start.'},
+    {label:'Unable to take order', text:'Sorry, we are unable to take your order right now.'}],
+  started: [
+    {label:'Work has started', text:'Work on your order has started.'},
+    {label:'Unable to make order', text:'We are sorry, we are unable to make your order.'}],
+  completed: [
+    {label:'Will dispatch soon', text:'Your order is complete and will be dispatched within a few days.'},
+    {label:'Dispatch delayed', text:'Your order is complete, but dispatch will be delayed. We apologize for the delay.'}],
+  dispatched: [
+    {label:'Order dispatched', text:'Your order has been successfully dispatched.'}],
+  delivered: [
+    {label:'Thank you', text:'Thank you for choosing us. We hope to see you again!'}]
+};
+function renderWA(o,wa){
+  const box=$('#wapanel'); if(!box) return;
+  const list=WA_MSGS[norm(o['Status'])];
+  if(!wa || !list){ box.style.display='none'; return; }
+  box.style.display='';
+  box.innerHTML='<h3><i class="fa-brands fa-whatsapp"></i> WhatsApp message</h3>'+list.map(m=>
+    `<a class="wabtn" target="_blank" rel="noopener" href="https://wa.me/${wa}?text=${encodeURIComponent(WA_INTRO+m.text)}">
+      <b>${esc(m.label)}</b><span>${esc(WA_INTRO+m.text)}</span></a>`).join('');
 }
 
 /* ---------- image viewer (back key closes it first) ---------- */
@@ -311,7 +348,7 @@ window.addEventListener('popstate',()=>{
 });
 $('#refresh').onclick=load;
 
-if(API_URL.startsWith('PASTE')){ app.innerHTML='<div class="empty">admin.html-er API_URL e Apps Script /exec URL boshan.</div>'; }
+if(API_URL.startsWith('PASTE')){ app.innerHTML='<div class="empty">Set API_URL to your Apps Script /exec URL.</div>'; }
 else if(!KEY){ showLogin(); }
 else load();
 </script>
