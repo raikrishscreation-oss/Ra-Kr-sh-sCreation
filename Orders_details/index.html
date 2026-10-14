@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Admin · RaiKrish's Collection</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@600;700&family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+:root{
+  --cream:#f6f0e2; --paper:#fffdf7; --green:#1f4d3a; --green-d:#173a2c;
+  --teal:#0f7a77; --gold:#b8893b; --ink:#26302b; --muted:#6c7a72; --line:#e3dac3;
+  --new:#c9871f; --started:#2f7fb0; --completed:#0f7a77; --dispatched:#7d58a8; --delivered:#2e7d4f;
+  --danger:#b3412f;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0}
+body{font-family:'Nunito Sans',system-ui,sans-serif;color:var(--ink);background:var(--cream);
+  padding-bottom:env(safe-area-inset-bottom,0);min-height:100vh}
+h1,h2,h3{font-family:'Lora',serif;margin:0}
+button{font:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+
+/* header */
+.top{position:sticky;top:0;z-index:20;background:var(--green);color:#fff;
+  padding:calc(10px + env(safe-area-inset-top,0)) 14px 10px;display:flex;align-items:center;gap:10px;
+  border-bottom:3px solid var(--gold)}
+.top img{width:42px;height:42px;border-radius:50%;background:#fff;border:2px solid var(--gold);object-fit:cover}
+.top a.brand{color:#fff;text-decoration:none;font-family:'Lora',serif;font-weight:700;font-size:17px;line-height:1.15;flex:1}
+.top a.brand small{display:block;font-family:'Nunito Sans';font-weight:400;font-size:12px;opacity:.8}
+.iconbtn{background:rgba(255,255,255,.14);border:0;color:#fff;width:40px;height:40px;border-radius:50%;font-size:16px}
+.iconbtn:active{background:rgba(255,255,255,.28)}
+.spin i{animation:sp 1s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+main{max-width:720px;margin:0 auto;padding:14px}
+
+/* search */
+.search{display:flex;align-items:stretch;background:var(--paper);border:2px solid var(--green);border-radius:14px;overflow:hidden}
+.search .pre{background:var(--green);color:#fff;font-weight:700;display:flex;align-items:center;padding:0 12px;letter-spacing:.5px}
+.search input{flex:1;min-width:0;border:0;padding:14px 12px;font:inherit;font-size:17px;background:transparent;color:var(--ink)}
+.search input:focus{outline:none}
+.search .go{border:0;background:transparent;color:var(--green);padding:0 14px;font-size:17px}
+.hint{font-size:12.5px;color:var(--muted);margin:6px 4px 14px}
+
+/* status buttons */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px}
+.sbtn{position:relative;text-align:left;border:0;border-radius:16px;padding:16px 14px;color:#fff;
+  display:flex;flex-direction:column;gap:6px;min-height:104px;text-decoration:none}
+.sbtn:active{transform:scale(.97)}
+.sbtn i{font-size:20px;opacity:.9}
+.sbtn b{font-size:18px;font-weight:700}
+.sbtn .n{position:absolute;right:12px;top:10px;font-family:'Lora',serif;font-size:30px;font-weight:700;opacity:.95}
+.sbtn.s-new{background:var(--new)} .sbtn.s-started{background:var(--started)}
+.sbtn.s-completed{background:var(--completed)} .sbtn.s-dispatched{background:var(--dispatched)}
+.sbtn.s-delivered{background:var(--delivered);grid-column:1 / -1;min-height:84px}
+
+/* list */
+.pagehead{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.back{border:0;background:var(--paper);border:1px solid var(--line);width:40px;height:40px;border-radius:50%;color:var(--green);font-size:16px}
+.pagehead h2{font-size:21px;flex:1}
+.pagehead .cnt{color:var(--muted);font-size:14px}
+.card{display:block;text-decoration:none;color:inherit;background:var(--paper);border:1px solid var(--line);
+  border-radius:14px;padding:12px 14px;margin-bottom:10px;border-left:6px solid var(--line)}
+.card:active{background:#fbf6e8}
+.card .r1{display:flex;justify-content:space-between;gap:8px;align-items:center}
+.card .oid{font-weight:700;color:var(--green);font-size:15.5px}
+.card .nm{margin-top:4px;font-size:15px}
+.card .meta{margin-top:3px;color:var(--muted);font-size:13px;display:flex;justify-content:space-between;gap:8px}
+.chip{display:inline-block;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:700;color:#fff}
+.c-new{background:var(--new)} .c-started{background:var(--started)} .c-completed{background:var(--completed)}
+.c-dispatched{background:var(--dispatched)} .c-delivered{background:var(--delivered)} .c-other{background:var(--muted)}
+.b-new{border-left-color:var(--new)} .b-started{border-left-color:var(--started)} .b-completed{border-left-color:var(--completed)}
+.b-dispatched{border-left-color:var(--dispatched)} .b-delivered{border-left-color:var(--delivered)}
+.empty{text-align:center;color:var(--muted);padding:34px 10px}
+
+/* detail */
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px}
+.panel h3{font-size:16px;margin-bottom:10px;color:var(--green)}
+.row{display:flex;gap:10px;padding:7px 0;border-bottom:1px dashed var(--line);font-size:15px}
+.row:last-child{border-bottom:0}
+.row .k{width:92px;flex:none;color:var(--muted);font-size:13.5px;padding-top:1px}
+.row .v{flex:1;word-break:break-word}
+.status-sel{width:100%;padding:13px 12px;font:inherit;font-size:16px;font-weight:700;border-radius:12px;
+  border:2px solid var(--green);background:#fff;color:var(--ink)}
+.actions{display:flex;gap:8px;margin-top:10px}
+.actions a{flex:1;text-align:center;text-decoration:none;padding:11px 8px;border-radius:12px;font-weight:700;font-size:14.5px;color:#fff}
+.a-call{background:var(--green)} .a-wa{background:#1f9d55}
+.item{display:flex;gap:12px;padding:10px 0;border-bottom:1px dashed var(--line);align-items:center}
+.item:last-child{border-bottom:0}
+.thumb{width:64px;height:64px;border-radius:12px;object-fit:cover;background:#eee4cc;border:1px solid var(--line);flex:none;cursor:zoom-in}
+.thumb.none{display:flex;align-items:center;justify-content:center;color:var(--gold);cursor:default}
+.item .info{flex:1;min-width:0}
+.item .pn{font-weight:700;font-size:15px}
+.item .sub{color:var(--muted);font-size:13px;margin-top:2px}
+.item .amt{font-weight:700;white-space:nowrap}
+.total{display:flex;justify-content:space-between;font-weight:700;font-size:17px;padding-top:10px;margin-top:4px;border-top:2px solid var(--green)}
+
+/* image viewer */
+.viewer{position:fixed;inset:0;z-index:50;background:rgba(10,20,15,.94);display:none;align-items:center;justify-content:center;padding:16px}
+.viewer.on{display:flex}
+.viewer img{max-width:100%;max-height:86vh;border-radius:12px}
+.viewer .x{position:absolute;top:calc(14px + env(safe-area-inset-top,0));right:14px;width:44px;height:44px;border-radius:50%;
+  border:0;background:#fff;color:var(--green-d);font-size:20px}
+.viewer .cap{position:absolute;bottom:calc(16px + env(safe-area-inset-bottom,0));left:0;right:0;text-align:center;color:#fff;font-size:14px;padding:0 16px}
+
+/* login + toast */
+.login{max-width:360px;margin:60px auto;text-align:center;background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:24px 18px}
+.login img{width:84px;height:84px;border-radius:50%;border:3px solid var(--gold)}
+.login input{width:100%;margin:14px 0 10px;padding:13px;font-size:17px;border:2px solid var(--green);border-radius:12px;text-align:center}
+.login button{width:100%;padding:13px;border:0;border-radius:12px;background:var(--green);color:#fff;font-weight:700;font-size:16px}
+.err{color:var(--danger);font-size:14px;margin-top:10px}
+.toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom,0));transform:translate(-50%,30px);opacity:0;
+  background:var(--green-d);color:#fff;padding:11px 18px;border-radius:99px;font-size:14.5px;z-index:60;transition:.25s;pointer-events:none;max-width:90vw;text-align:center}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.toast.bad{background:var(--danger)}
+.loading{text-align:center;padding:50px 0;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <img src="https://drive.google.com/thumbnail?id=1zqOu2NPiGQ4MZT6rxNwbzn_7csTxUQpD&sz=s800" alt="Logo">
+  <a class="brand" href="https://raikrishcolection.arnetworkhouse.in/#top" target="_blank" rel="noopener">RaiKrish's Collection<small>Admin · Orders</small></a>
+  <button class="iconbtn" id="refresh" aria-label="Refresh"><i class="fa-solid fa-rotate"></i></button>
+</header>
+
+<main id="app"><div class="loading"><i class="fa-solid fa-spinner fa-spin"></i> Loading…</div></main>
+
+<div class="viewer" id="viewer">
+  <button class="x" id="vx" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+  <img id="vimg" alt="">
+  <div class="cap" id="vcap"></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ====== SETTINGS ====== */
+const API_URL = 'https://script.google.com/macros/s/AKfycbzBloNP971PIYnNYadLXnSKtz4Rbuvyw2U1p_Wi_4miRKggzFxeogWMAPFCmFuBqw/exec';
+/* ====================== */
+
+const STATUSES = ['New','Started','Completed','Dispatched','Delivered'];
+const ICONS = {new:'fa-bell',started:'fa-hammer',completed:'fa-circle-check',dispatched:'fa-truck-fast',delivered:'fa-box-open'};
+const $ = s => document.querySelector(s);
+const app = $('#app');
+let DATA = {orders:[],items:[],images:{}};
+let KEY = localStorage.getItem('rk_admin_key') || '';
+let viewerOpen = false;
+
+const esc = s => String(s ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const norm = s => String(s||'').trim().toLowerCase();
+const num = v => { const n = Number(String(v).replace(/[^\d.\-]/g,'')); return isNaN(n)?0:n; };
+const rupee = v => '₹' + Math.round(num(v)).toLocaleString('en-IN');
+const idNorm = s => String(s||'').toLowerCase().replace(/[^a-z0-9]/g,'');
+
+function imgUrl(link){
+  if(!link) return '';
+  const m = String(link).match(/\/d\/([-\w]{20,})/) || String(link).match(/[?&]id=([-\w]{20,})/);
+  return m ? `https://drive.google.com/thumbnail?id=${m[1]}&sz=w1000` : String(link);
+}
+function toast(msg,bad){
+  const t=$('#toast'); t.textContent=msg; t.className='toast on'+(bad?' bad':'');
+  clearTimeout(toast.t); toast.t=setTimeout(()=>t.className='toast',2400);
+}
+
+/* ---------- data ---------- */
+async function api(params){
+  const q = new URLSearchParams({...params,key:KEY}).toString();
+  const r = await fetch(API_URL+'?'+q);
+  return r.json();
+}
+async function load(){
+  const b=$('#refresh'); b.classList.add('spin');
+  try{
+    const d = await api({action:'data'});
+    if(!d.ok){ if(d.error==='bad_key'){ KEY=''; localStorage.removeItem('rk_admin_key'); return showLogin('PIN thik noy'); } throw new Error(d.error); }
+    DATA.orders = d.orders.slice().reverse();               // newest first
+    DATA.items = d.items;
+    DATA.images = {};
+    d.images.forEach(r=>{ DATA.images[String(r['Product ID']).trim()] = imgUrl(r['Image Link']); });
+    route();
+  }catch(e){
+    app.innerHTML = `<div class="empty"><i class="fa-solid fa-triangle-exclamation"></i><br>Data load hoyni.<br><small>${esc(e.message||e)}</small><br><br><button class="back" style="width:auto;padding:0 18px" onclick="load()">Abar chesta korun</button></div>`;
+  }finally{ b.classList.remove('spin'); }
+}
+
+/* ---------- views ---------- */
+function showLogin(msg){
+  app.innerHTML = `<div class="login">
+    <img src="https://drive.google.com/thumbnail?id=1zqOu2NPiGQ4MZT6rxNwbzn_7csTxUQpD&sz=s400" alt="">
+    <h2 style="margin-top:10px">Admin PIN</h2>
+    <input id="pin" type="password" inputmode="numeric" autocomplete="current-password" placeholder="PIN">
+    <button id="pinGo">Dhukun</button>
+    ${msg?`<div class="err">${esc(msg)}</div>`:''}
+  </div>`;
+  const go=()=>{ KEY=$('#pin').value.trim(); if(!KEY) return; localStorage.setItem('rk_admin_key',KEY); app.innerHTML='<div class="loading"><i class="fa-solid fa-spinner fa-spin"></i></div>'; load(); };
+  $('#pinGo').onclick=go; $('#pin').onkeydown=e=>{ if(e.key==='Enter') go(); };
+}
+
+function countOf(st){ return DATA.orders.filter(o=>norm(o['Status'])===st).length; }
+
+function cardHTML(o){
+  const st = norm(o['Status']);
+  const known = STATUSES.some(s=>s.toLowerCase()===st);
+  return `<a class="card b-${known?st:'x'}" href="#o/${encodeURIComponent(o['Order ID'])}">
+    <div class="r1"><span class="oid">${esc(o['Order ID'])}</span><span class="chip c-${known?st:'other'}">${esc(o['Status']||'—')}</span></div>
+    <div class="nm">${esc(o['Name'])}</div>
+    <div class="meta"><span>${esc(o['Date & Time'])}</span><span>${esc(o['Total Qty'])} pcs · <b>${rupee(o['Total (₹)'])}</b></span></div>
+  </a>`;
+}
+
+function viewHome(){
+  app.innerHTML = `
+    <div class="search"><span class="pre">RK-</span>
+      <input id="q" inputmode="numeric" autocomplete="off" placeholder="261011-003 ba shesh digit" aria-label="Order ID search">
+      <button class="go" id="qclear" aria-label="Clear" style="display:none"><i class="fa-solid fa-xmark"></i></button></div>
+    <div class="hint">Shudhu shesh er digit likhlei hobe, jemon 003</div>
+    <div id="results"></div>
+    <div class="grid" id="grid">
+      ${STATUSES.map(s=>{const k=s.toLowerCase();return `<a class="sbtn s-${k}" href="#s/${k}"><span class="n">${countOf(k)}</span><i class="fa-solid ${ICONS[k]}"></i><b>${s}</b></a>`}).join('')}
+    </div>`;
+  const q=$('#q'), res=$('#results'), grid=$('#grid'), clr=$('#qclear');
+  q.oninput=()=>{
+    let v=idNorm(q.value); if(v.startsWith('rk')) v=v.slice(2);
+    clr.style.display = q.value?'':'none';
+    if(!v){ res.innerHTML=''; grid.style.display=''; return; }
+    grid.style.display='none';
+    const hits = DATA.orders.filter(o=>idNorm(o['Order ID']).replace(/^rk/,'').endsWith(v));
+    res.innerHTML = hits.length ? hits.map(cardHTML).join('') : '<div class="empty">Ei ID-r kono order paoa jayni</div>';
+    if(hits.length===1 && v.length>=3) location.hash = '#o/'+encodeURIComponent(hits[0]['Order ID']);
+  };
+  clr.onclick=()=>{ q.value=''; q.oninput(); q.focus(); };
+}
+
+function viewList(st){
+  const list = DATA.orders.filter(o=>norm(o['Status'])===st);
+  const name = st.charAt(0).toUpperCase()+st.slice(1);
+  app.innerHTML = `<div class="pagehead"><button class="back" onclick="history.back()" aria-label="Back"><i class="fa-solid fa-arrow-left"></i></button>
+    <h2>${name}</h2><span class="cnt">${list.length} order</span></div>
+    ${list.length?list.map(cardHTML).join(''):'<div class="empty">Ei status-e kono order nei</div>'}`;
+}
+
+function viewOrder(id){
+  const o = DATA.orders.find(x=>String(x['Order ID']).trim()===id);
+  if(!o){ app.innerHTML=`<div class="pagehead"><button class="back" onclick="history.back()"><i class="fa-solid fa-arrow-left"></i></button><h2>Order paoa jayni</h2></div>`; return; }
+  const items = DATA.items.filter(i=>String(i['Order ID']).trim()===id);
+  const st = norm(o['Status']);
+  const opts = STATUSES.slice(); if(st && !opts.some(s=>s.toLowerCase()===st)) opts.unshift(o['Status']);
+  const ph = String(o['Phone']||'').replace(/\D/g,'');
+  const wa = ph.length===10 ? '91'+ph : ph;
+  const addr = [o['Address'],o['City'],o['State'],o['Pincode']].filter(Boolean).join(', ');
+  const R=(k,v)=> v?`<div class="row"><div class="k">${k}</div><div class="v">${esc(v)}</div></div>`:'';
+  app.innerHTML = `
+    <div class="pagehead"><button class="back" onclick="history.back()" aria-label="Back"><i class="fa-solid fa-arrow-left"></i></button><h2>${esc(id)}</h2></div>
+    <div class="panel"><h3>Status</h3>
+      <select class="status-sel" id="stsel">${opts.map(s=>`<option ${norm(s)===st?'selected':''}>${esc(s)}</option>`).join('')}</select>
+    </div>
+    <div class="panel"><h3>Grahok</h3>
+      ${R('Name',o['Name'])}${R('Phone',o['Phone'])}${R('Email',o['Email'])}${R('Address',addr)}${R('Date',o['Date & Time'])}${R('Note',o['Note'])}
+      ${ph?`<div class="actions"><a class="a-call" href="tel:${ph}"><i class="fa-solid fa-phone"></i> Call</a><a class="a-wa" href="https://wa.me/${wa}" target="_blank" rel="noopener"><i class="fa-brands fa-whatsapp"></i> WhatsApp</a></div>`:''}
+    </div>
+    <div class="panel"><h3>Items (${items.length})</h3>
+      ${items.length?items.map(i=>{
+        const pid=String(i['Product ID']).trim(), im=DATA.images[pid];
+        return `<div class="item">
+          ${im?`<img class="thumb" src="${esc(im)}" alt="${esc(i['Product Name'])}" loading="lazy" data-full="${esc(im)}" data-cap="${esc(i['Product Name'])}">`:`<div class="thumb none"><i class="fa-regular fa-image"></i></div>`}
+          <div class="info"><div class="pn">${esc(i['Product Name'])}</div>
+            <div class="sub">${esc(pid)}${i['Type']?' · '+esc(i['Type']):''}</div>
+            <div class="sub">${esc(i['Qty'])} × ${rupee(i['Unit Price (₹)'])}</div></div>
+          <div class="amt">${rupee(i['Amount (₹)'])}</div></div>`;}).join(''):'<div class="empty" style="padding:14px">Item paoa jayni</div>'}
+      <div class="total"><span>Total · ${esc(o['Total Qty'])} pcs</span><span>${rupee(o['Total (₹)'])}</span></div>
+    </div>`;
+  app.querySelectorAll('.thumb[data-full]').forEach(t=>t.onclick=()=>openViewer(t.dataset.full,t.dataset.cap));
+  $('#stsel').onchange=async e=>{
+    const sel=e.target, prev=o['Status'], val=sel.value; sel.disabled=true;
+    try{
+      const r=await api({action:'update',id:id,status:val});
+      if(!r.ok) throw new Error(r.error);
+      o['Status']=val; toast('Status: '+val);
+    }catch(err){ sel.value=prev; toast('Update hoyni, abar chesta korun',true); }
+    sel.disabled=false;
+  };
+}
+
+/* ---------- image viewer (back key closes it first) ---------- */
+function openViewer(src,cap){
+  $('#vimg').src=src; $('#vcap').textContent=cap||'';
+  $('#viewer').classList.add('on'); viewerOpen=true;
+  history.pushState({viewer:1},'');
+}
+function closeViewerUI(){ $('#viewer').classList.remove('on'); viewerOpen=false; $('#vimg').src=''; }
+$('#vx').onclick=()=>history.back();
+$('#viewer').onclick=e=>{ if(e.target.id==='viewer') history.back(); };
+
+/* ---------- routing ---------- */
+function route(){
+  if(!KEY) return showLogin();
+  const h = location.hash.replace(/^#/,'');
+  window.scrollTo(0,0);
+  if(h.startsWith('s/')) return viewList(decodeURIComponent(h.slice(2)));
+  if(h.startsWith('o/')) return viewOrder(decodeURIComponent(h.slice(2)));
+  viewHome();
+}
+window.addEventListener('popstate',()=>{
+  if(viewerOpen){ closeViewerUI(); return; }   // back from photo -> order page, not out of the app
+  route();
+});
+$('#refresh').onclick=load;
+
+if(API_URL.startsWith('PASTE')){ app.innerHTML='<div class="empty">admin.html-er API_URL e Apps Script /exec URL boshan.</div>'; }
+else if(!KEY){ showLogin(); }
+else load();
+</script>
+</body>
+</html>
