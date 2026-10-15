@@ -42,7 +42,6 @@ input:focus{outline:2px solid var(--gold);border-color:var(--gold)}
 #sheetHost{transform-origin:top left;width:794px}
 
 /* ===== invoice sheet (A4) – same as invoice generator ===== */
-/* To get the paper background back: copy the  background:#fffaf0 url("data:image/...")  value from your old invoice file into .sheet below */
 .sheet{width:794px;min-height:1123px;background:#fffaf0;color:#1f2a24;font-family:'Poppins',sans-serif;font-size:13px;display:flex;flex-direction:column;position:relative;overflow:hidden}
 .sheet .band,.sheet .body,.sheet .foot{position:relative;z-index:1}
 .sheet .band{color:#5b6b62;padding:66px 76px 14px;display:flex;align-items:center;gap:16px}
@@ -134,8 +133,10 @@ input:focus{outline:2px solid var(--gold);border-color:var(--gold)}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script>
 /* ================= CONFIG ================= */
-// Paste your NEW Apps Script Web App URL (ends with /exec)
 const API_URL = 'https://script.google.com/macros/s/AKfycbwuYVjxEo9tdleam4Oitdyet7r7jS6KwgZL99xV6Ca3Ozzz0xhQSZpwf1wOzKTlRJrd/exec';
+
+// Background image: auto-copied from your old invoice page (same folder). Change the file name if yours is different.
+const OLD_INVOICE_URL = 'index.html';
 
 const LOGO_URL = 'https://drive.google.com/thumbnail?id=1zqOu2NPiGQ4MZT6rxNwbzn_7csTxUQpD&sz=s800';
 const SITE = 'raikrishcolection.arnetworkhouse.in';
@@ -149,25 +150,23 @@ const lsGet = (k, d) => { try { const v = localStorage.getItem(k); return v === 
 const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
 function say(msg, cls) { const s = $('status'); s.className = 'status ' + (cls || ''); s.textContent = msg; }
 
-let pin = lsGet('rkc_lookup_pin', '');
 let logoSrc = lsGet('rkc_logo_data', '') || LOGO_URL;
 let qrSrc = lsGet('rkc_qr_data', '');
 let cur = null;
+let bgSrc = lsGet('rkc_bg_data', '');
 $('topLogo').src = LOGO_URL;
 
-async function api(params, retried) {
+async function api(params) {
   if (!API_URL) throw new Error('API_URL is empty – paste the Apps Script URL in the file');
-  const u = API_URL + '?' + new URLSearchParams(Object.assign({}, params, { pin: pin, _: Date.now() }));
-  const r = await (await fetch(u)).json();
-  if (r.auth === false && !retried) {
-    const p = prompt('Enter PIN');
-    if (p === null) throw new Error('PIN required');
-    pin = p.trim(); lsSet('rkc_lookup_pin', pin);
-    return api(params, true);
-  }
-  if (r.auth === false) { pin = ''; lsSet('rkc_lookup_pin', ''); }
-  return r;
+  const u = API_URL + '?' + new URLSearchParams(Object.assign({}, params, { _: Date.now() }));
+  return (await fetch(u)).json();
 }
+
+/* paper background: take the base64 image from the old invoice page */
+fetch(OLD_INVOICE_URL + '?_=' + Date.now()).then(r => r.text()).then(t => {
+  const m = t.match(/\.sheet\{[^}]*?url\(["']?(data:image[^"')]+)["']?\)/);
+  if (m) { bgSrc = m[1]; lsSet('rkc_bg_data', bgSrc); if (cur) renderDoc(); }
+}).catch(() => {});
 
 /* logo / QR as data URLs so the PDF always includes them */
 api({ action: 'assets' }).then(r => {
@@ -228,7 +227,7 @@ function docHTML(v) {
       <td class="r">${i.qty}</td><td class="r">${inr(i.rate)}</td><td class="r">${inr(i.amount)}</td></tr>`).join('');
   const addr = esc(v.address).replace(/\n/g, '<br>');
   return `
-  <div class="sheet">
+  <div class="sheet"${bgSrc ? ` style='background:#fffaf0 url("${bgSrc}") top left/100% auto repeat-y'` : ''}>
     <div class="band">
       <img src="${esc(logoSrc)}" crossorigin="anonymous" alt="">
       <div class="brand"><h2>RaiKrish's Collection</h2><p>Where Creativity Meets Craft</p></div>
