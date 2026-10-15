@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b3d29">
+<meta name="robots" content="noindex, nofollow">
+<title>Admin – RaiKrish's Collection</title>
+<link rel="icon" href="https://drive.google.com/thumbnail?id=1zqOu2NPiGQ4MZT6rxNwbzn_7csTxUQpD&sz=s800">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --green:#0b3d29; --green-2:#14573b; --gold:#c9a24b; --gold-soft:#f1e3bd;
+  --cream:#faf6ec; --card:#ffffff; --ink:#1d2b24; --muted:#6b7a72; --line:#e6dfcd;
+  --ok:#1f7a4d; --bad:#b3361f; --radius:16px;
+  --sans:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
+  --serif:'Playfair Display',Georgia,'Times New Roman',serif;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;font-family:var(--sans);background:var(--cream);color:var(--ink);line-height:1.45;min-height:100vh;display:flex;flex-direction:column}
+body.lock{overflow:hidden}
+button{font-family:inherit;cursor:pointer}
+
+/* Top bar */
+.topbar{position:sticky;top:0;z-index:20;background:var(--green);color:#fff;display:flex;align-items:center;gap:12px;
+  padding:calc(10px + env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) 10px max(16px,env(safe-area-inset-left));
+  border-bottom:3px solid var(--gold)}
+.logo{width:42px;height:42px;border-radius:50%;object-fit:cover;background:#fff;border:2px solid var(--gold);flex:none}
+.brand b{font-family:var(--serif);font-size:1.05rem;display:block;line-height:1.15}
+.brand small{color:var(--gold);letter-spacing:.16em;text-transform:uppercase;font-size:.62rem;font-weight:600}
+.spacer{flex:1}
+.btn-ghost{background:transparent;border:1px solid rgba(255,255,255,.35);color:#fff;border-radius:999px;padding:8px 14px;font-size:.82rem;font-weight:500}
+.btn-ghost:hover{background:rgba(255,255,255,.12)}
+
+main{flex:1;width:100%;max-width:1200px;margin:0 auto;padding:18px max(14px,env(safe-area-inset-right)) 28px max(14px,env(safe-area-inset-left))}
+
+/* Buttons */
+.btn-primary,.btn-secondary{border-radius:12px;padding:13px 20px;font-size:.95rem;font-weight:600;border:1.5px solid transparent;transition:.15s}
+.btn-primary{background:var(--green);color:#fff}
+.btn-primary:hover:not(:disabled){background:var(--green-2)}
+.btn-primary:disabled{opacity:.45;cursor:not-allowed}
+.btn-secondary{background:#fff;color:var(--green);border-color:var(--line)}
+.btn-secondary:hover{border-color:var(--green)}
+
+/* Toolbar */
+.toolbar{display:flex;gap:10px;flex-wrap:wrap}
+.toolbar input,.toolbar select{padding:12px 14px;border:1.5px solid var(--line);border-radius:12px;font-size:16px;background:#fff;color:var(--ink);font-family:inherit}
+.toolbar input{flex:1 1 220px;min-width:0}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:12px 2px 6px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1.5px solid var(--line);background:#fff;color:var(--ink);padding:7px 14px;border-radius:999px;font-size:.84rem;font-weight:500}
+.chip.on{background:var(--green);border-color:var(--green);color:#fff}
+.count{color:var(--muted);font-size:.84rem;margin:8px 2px 12px}
+
+/* Grid */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px}
+@media (max-width:520px){.grid{grid-template-columns:repeat(2,1fr);gap:11px}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;cursor:pointer;text-align:left;padding:0;
+  transition:transform .15s,box-shadow .15s;display:flex;flex-direction:column;color:inherit}
+.card:hover{transform:translateY(-3px);box-shadow:0 16px 28px -18px rgba(11,61,41,.55)}
+.card:focus-visible{outline:3px solid var(--gold)}
+.thumb{position:relative;aspect-ratio:1/1;background:linear-gradient(110deg,#efe9d8 30%,#f7f2e4 50%,#efe9d8 70%);background-size:200% 100%}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.badge{position:absolute;top:8px;right:8px;font-size:.66rem;font-weight:700;padding:3px 9px;border-radius:999px;letter-spacing:.04em;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.15)}
+.badge.yes{color:var(--ok)} .badge.no{color:var(--bad)}
+.meta{padding:10px 12px 12px}
+.meta .nm{font-weight:600;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.meta .id{font-size:.76rem;color:var(--muted);margin-top:2px}
+.skel .thumb{animation:sh 1.3s infinite linear}
+.skel .meta{height:52px}
+@keyframes sh{to{background-position:-200% 0}}
+.empty{text-align:center;color:var(--muted);padding:50px 10px}
+
+/* Modal */
+.overlay{position:fixed;inset:0;z-index:50;background:rgba(11,61,41,.6);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:18px}
+.panel{position:relative;background:var(--cream);border-radius:22px;width:min(920px,100%);max-height:92vh;overflow:auto;display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);box-shadow:0 30px 70px -20px rgba(0,0,0,.5);animation:pop .18s ease-out}
+@keyframes pop{from{opacity:0;transform:translateY(14px) scale(.98)}}
+.close{position:absolute;top:10px;right:10px;z-index:3;width:38px;height:38px;border-radius:50%;border:none;background:rgba(255,255,255,.92);font-size:1.4rem;line-height:1;color:var(--green);box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.pic{background:#fff;border-right:1px solid var(--line)}
+.pic img{width:100%;aspect-ratio:1/1;object-fit:cover;display:block;background:#efe9d8}
+.ids{padding:14px 18px 18px}
+.ids h2{font-family:var(--serif);color:var(--green);margin:0;font-size:1.25rem;line-height:1.25;word-break:break-word}
+.ids p{margin:6px 0 0;color:var(--muted);font-size:.84rem}
+.ids p span{background:var(--gold-soft);color:#6d5313;border-radius:6px;padding:2px 8px;font-weight:600}
+.form{padding:22px 22px 20px;display:flex;flex-direction:column;gap:14px}
+.form label{display:block;font-size:.76rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.form input,.form select,.form textarea{display:block;width:100%;margin-top:6px;padding:12px 13px;border:1.5px solid var(--line);border-radius:12px;font-size:16px;font-family:inherit;color:var(--ink);background:#fff;text-transform:none;letter-spacing:0;font-weight:500}
+.form textarea{resize:vertical;min-height:84px}
+.form input:focus,.form select:focus,.form textarea:focus,.toolbar input:focus,.toolbar select:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 3px rgba(20,87,59,.15)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.calc{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.calc>div{background:var(--green);color:#fff;border-radius:14px;padding:12px 14px;border:1px solid var(--gold)}
+.calc span{display:block;font-size:.68rem;letter-spacing:.07em;text-transform:uppercase;color:var(--gold-soft)}
+.calc em{font-style:normal;background:rgba(255,255,255,.16);border-radius:5px;padding:1px 6px;margin-left:4px;font-size:.6rem}
+.calc strong{display:block;font-size:1.45rem;font-family:var(--serif);margin-top:4px}
+.calc strong.neg{color:#ffb4a3}
+.hint{margin:-4px 0 0;font-size:.76rem;color:var(--muted)}
+.actions{display:flex;gap:10px;justify-content:flex-end;margin-top:4px}
+.actions .btn-primary{flex:1;max-width:240px}
+
+@media (max-width:720px){
+  .overlay{padding:0;align-items:flex-end}
+  .panel{grid-template-columns:1fr;border-radius:22px 22px 0 0;max-height:94vh;max-height:94dvh;padding-bottom:env(safe-area-inset-bottom)}
+  .pic{border-right:none;border-bottom:1px solid var(--line);display:grid;grid-template-columns:110px 1fr;align-items:center}
+  .pic img{aspect-ratio:1/1}
+  .ids{padding:12px 50px 12px 14px}
+  .ids h2{font-size:1.05rem}
+  .form{padding:18px 16px 16px}
+  .actions .btn-primary{max-width:none}
+}
+
+/* Toast */
+.toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom));transform:translate(-50%,30px);opacity:0;pointer-events:none;z-index:99;
+  background:var(--green);color:#fff;padding:12px 20px;border-radius:999px;font-size:.9rem;font-weight:500;box-shadow:0 10px 30px rgba(0,0,0,.3);transition:.25s;max-width:90vw;text-align:center}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.toast.bad{background:var(--bad)}
+
+footer{text-align:center;color:var(--muted);font-size:.78rem;padding:14px 14px calc(18px + env(safe-area-inset-bottom))}
+footer a{color:var(--green)}
+.setup{background:#fff7e0;border:1px solid var(--gold);border-radius:14px;padding:16px;margin:20px auto;max-width:560px;font-size:.92rem}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <img class="logo" id="logo" alt="RaiKrish's Collection logo">
+  <div class="brand"><b>RaiKrish's Collection</b><small>Admin Dashboard</small></div>
+  <div class="spacer"></div>
+  <button class="btn-ghost" id="refreshBtn">↻ Refresh</button>
+</header>
+
+<main>
+  <!-- Products -->
+  <section id="appView">
+    <div class="toolbar">
+      <input id="search" type="search" placeholder="Search by name or ID…" autocomplete="off">
+      <select id="stsFilter" aria-label="Filter by status">
+        <option value="All">All status</option>
+        <option value="Yes">Sts: Yes</option>
+        <option value="No">Sts: No</option>
+      </select>
+    </div>
+    <div class="chips" id="chips"></div>
+    <p class="count" id="count"></p>
+    <div class="grid" id="grid"></div>
+    <div class="empty" id="empty" hidden>No products found.</div>
+  </section>
+
+  <div class="setup" id="setupMsg" hidden>
+    <b>Setup needed:</b> open <code>index.html</code> and paste your Apps Script Web App URL into <code>CONFIG.API_URL</code>.
+  </div>
+</main>
+
+<footer>© RaiKrish's Collection · Associated with <a href="https://arnetworkhouse.in/" target="_blank" rel="noopener">AR Network House</a></footer>
+
+<!-- Product dashboard -->
+<div class="overlay" id="overlay" hidden>
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="pName">
+    <button class="close" id="closeBtn" aria-label="Close">×</button>
+    <div class="pic">
+      <img id="pImg" alt="">
+      <div class="ids">
+        <h2 id="pName"></h2>
+        <p>Product ID: <span id="pId"></span></p>
+      </div>
+    </div>
+    <div class="form">
+      <div>
+        <label for="fType">Type</label>
+        <select id="fType"></select>
+        <input id="fTypeCustom" type="text" maxlength="60" placeholder="Type your own category" hidden>
+      </div>
+      <div>
+        <label for="fDesc">Description</label>
+        <textarea id="fDesc" rows="3" maxlength="2000"></textarea>
+      </div>
+      <div class="two">
+        <div><label for="fPrice">Price (₹)</label><input id="fPrice" type="number" inputmode="decimal" min="0" step="any"></div>
+        <div><label for="fDisc" id="discLabel">Discount (₹)</label><input id="fDisc" type="number" inputmode="decimal" min="0" step="any"></div>
+      </div>
+      <div class="two">
+        <div><label for="fCost">Cost (₹)</label><input id="fCost" type="number" inputmode="decimal" min="0" step="any"></div>
+        <div><label for="fSts">Sts</label>
+          <select id="fSts"><option value="Yes">Yes</option><option value="No">No</option></select>
+        </div>
+      </div>
+      <div class="calc" aria-live="polite">
+        <div><span>Selling Price <em>auto</em></span><strong id="cSell">₹0</strong></div>
+        <div><span>Profit <em>auto</em></span><strong id="cProfit">₹0</strong></div>
+      </div>
+      <p class="hint">Selling Price and Profit come from sheet formulas and cannot be edited. The preview updates as you type; Save writes your changes to the sheet.</p>
+      <div class="actions">
+        <button class="btn-secondary" id="cancelBtn" type="button">Close</button>
+        <button class="btn-primary" id="saveBtn" type="button" disabled>Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+/* ================= CONFIG ================= */
+const CONFIG = {
+  API_URL: 'https://script.google.com/macros/s/AKfycbzvweQ4V8zlO6VSCt2xnyPBHTgyJuojlnGiurGzUR3NOFJPEXUqu3rzFQPwMjjlQIEM/exec',   // Apps Script Web App URL (ends with /exec)
+  LOGO: 'https://drive.google.com/thumbnail?id=1zqOu2NPiGQ4MZT6rxNwbzn_7csTxUQpD&sz=s800'
+};
+const DEFAULT_TYPES = ['Jewellery Set', 'Hair Pin', 'Necklace'];
+const OTHER = '__other__';
+const PLACEHOLDER = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><rect width="200" height="200" fill="#efe9d8"/>' +
+  '<g fill="none" stroke="#b9ad88" stroke-width="5" stroke-linecap="round"><circle cx="100" cy="92" r="30"/><path d="M70 150h60"/></g></svg>');
+
+const $ = id => document.getElementById(id);
+const state = { products: [], types: [], mode: 'amount', q: '', type: 'All', sts: 'All', cur: null, orig: '', saving: false };
+
+/* ================= Helpers ================= */
+const fmt = n => '₹' + Math.round(n).toLocaleString('en-IN');
+function imgUrl(link) {
+  link = String(link || '').trim();
+  if (!link) return '';
+  const m = link.match(/\/d\/([\w-]{20,})/) || link.match(/[?&]id=([\w-]{20,})/);
+  return m ? 'https://drive.google.com/thumbnail?id=' + m[1] + '&sz=w800' : link;
+}
+function setImg(el, link) {
+  el.onerror = () => { el.onerror = null; el.src = PLACEHOLDER; };
+  el.src = imgUrl(link) || PLACEHOLDER;
+}
+function toast(msg, bad) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.toggle('bad', !!bad);
+  t.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => t.classList.remove('show'), 2600);
+}
+function calc(price, disc, cost) {
+  price = Math.max(0, Number(price) || 0);
+  disc = Math.max(0, Number(disc) || 0);
+  cost = Number(cost) || 0;
+  let sell = state.mode === 'percent' ? price * (1 - Math.min(disc, 100) / 100) : price - disc;
+  sell = Math.max(0, sell);
+  return { sell: Math.round(sell), profit: Math.round(sell - cost) };
+}
+function allTypes() {
+  const out = [], seen = new Set();
+  DEFAULT_TYPES.concat(state.types).forEach(t => {
+    const k = String(t).trim().toLowerCase();
+    if (k && !seen.has(k)) { seen.add(k); out.push(String(t).trim()); }
+  });
+  return out;
+}
+
+/* ================= API ================= */
+async function api(action, payload) {
+  if (!CONFIG.API_URL || CONFIG.API_URL.indexOf('PASTE_') === 0) throw new Error('API URL not set');
+  let res;
+  if (action === 'list') {
+    res = await fetch(CONFIG.API_URL + '?action=list');
+  } else {
+    res = await fetch(CONFIG.API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(Object.assign({ action: action }, payload))
+    });
+  }
+  let data;
+  try { data = await res.json(); } catch (e) { throw new Error('Server error. Check the Apps Script deployment.'); }
+  if (!data.ok) throw new Error(data.error || 'Request failed');
+  return data;
+}
+
+/* ================= Load & render ================= */
+async function load(showSkeleton) {
+  if (showSkeleton) {
+    $('grid').innerHTML = '<div class="card skel"><div class="thumb"></div><div class="meta"></div></div>'.repeat(8);
+    $('empty').hidden = true;
+    $('count').textContent = 'Loading products…';
+  }
+  const data = await api('list');
+  state.products = data.products;
+  state.types = data.types || [];
+  state.mode = data.discountMode === 'percent' ? 'percent' : 'amount';
+  renderChips();
+  renderGrid();
+}
+
+function renderChips() {
+  const present = allTypes().filter(t => state.products.some(p => p.type.toLowerCase() === t.toLowerCase()));
+  const box = $('chips');
+  box.innerHTML = '';
+  ['All'].concat(present).forEach(t => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'chip' + (state.type.toLowerCase() === t.toLowerCase() ? ' on' : '');
+    b.textContent = t;
+    b.onclick = () => { state.type = t; renderChips(); renderGrid(); };
+    box.appendChild(b);
+  });
+}
+
+function renderGrid() {
+  const q = state.q.trim().toLowerCase();
+  const list = state.products.filter(p =>
+    (state.type === 'All' || p.type.toLowerCase() === state.type.toLowerCase()) &&
+    (state.sts === 'All' || p.sts === state.sts) &&
+    (!q || p.imageName.toLowerCase().includes(q) || p.id.toLowerCase().includes(q))
+  );
+  const grid = $('grid');
+  grid.innerHTML = '';
+  list.forEach(p => {
+    const card = document.createElement('button');
+    card.type = 'button';
+    card.className = 'card';
+    card.setAttribute('aria-label', 'Edit ' + (p.imageName || p.id));
+
+    const thumb = document.createElement('div');
+    thumb.className = 'thumb';
+    const img = document.createElement('img');
+    img.loading = 'lazy';
+    img.alt = p.imageName || 'Product ' + p.id;
+    setImg(img, p.imageLink);
+    const badge = document.createElement('span');
+    badge.className = 'badge ' + (p.sts === 'Yes' ? 'yes' : 'no');
+    badge.textContent = p.sts === 'Yes' ? 'Yes' : 'No';
+    thumb.append(img, badge);
+
+    const meta = document.createElement('div');
+    meta.className = 'meta';
+    const nm = document.createElement('div');
+    nm.className = 'nm';
+    nm.textContent = p.imageName || 'Untitled';
+    const id = document.createElement('div');
+    id.className = 'id';
+    id.textContent = 'ID: ' + p.id;
+    meta.append(nm, id);
+
+    card.append(thumb, meta);
+    card.onclick = () => openModal(p.id);
+    grid.appendChild(card);
+  });
+  $('empty').hidden = list.length > 0;
+  $('count').textContent = list.length + ' of ' + state.products.length + ' products';
+}
+
+/* ================= Dashboard (modal) ================= */
+function buildTypeSelect(val) {
+  const sel = $('fType');
+  sel.innerHTML = '';
+  const ph = new Option('— Select type —', '');
+  sel.add(ph);
+  allTypes().forEach(t => sel.add(new Option(t, t)));
+  sel.add(new Option('Other (type your own)…', OTHER));
+  const match = allTypes().find(t => t.toLowerCase() === String(val || '').toLowerCase());
+  sel.value = match || '';
+  $('fTypeCustom').hidden = true;
+  $('fTypeCustom').value = '';
+}
+function getType() {
+  return $('fType').value === OTHER ? $('fTypeCustom').value.trim() : $('fType').value;
+}
+function getForm() {
+  return {
+    type: getType(),
+    description: $('fDesc').value,
+    price: $('fPrice').value === '' ? 0 : Number($('fPrice').value),
+    discount: $('fDisc').value === '' ? 0 : Number($('fDisc').value),
+    cost: $('fCost').value === '' ? 0 : Number($('fCost').value),
+    sts: $('fSts').value
+  };
+}
+function isDirty() { return JSON.stringify(getForm()) !== state.orig; }
+function updateCalc() {
+  const f = getForm();
+  const r = calc(f.price, f.discount, f.cost);
+  $('cSell').textContent = fmt(r.sell);
+  const pe = $('cProfit');
+  pe.textContent = (r.profit < 0 ? '-' : '') + fmt(Math.abs(r.profit));
+  pe.classList.toggle('neg', r.profit < 0);
+  $('saveBtn').disabled = state.saving || !isDirty();
+}
+function fill(p) {
+  setImg($('pImg'), p.imageLink);
+  $('pImg').alt = p.imageName || '';
+  $('pName').textContent = p.imageName || 'Untitled';
+  $('pId').textContent = p.id;
+  buildTypeSelect(p.type);
+  $('fDesc').value = p.description;
+  $('fPrice').value = p.price;
+  $('fDisc').value = p.discount;
+  $('fCost').value = p.cost;
+  $('fSts').value = p.sts === 'Yes' ? 'Yes' : 'No';
+  $('discLabel').textContent = state.mode === 'percent' ? 'Discount (%)' : 'Discount (₹)';
+  state.orig = JSON.stringify(getForm());
+  // Show what the sheet itself calculated for the saved values
+  $('cSell').textContent = fmt(p.sellingPrice);
+  $('cProfit').textContent = (p.profit < 0 ? '-' : '') + fmt(Math.abs(p.profit));
+  $('cProfit').classList.toggle('neg', p.profit < 0);
+  $('saveBtn').disabled = true;
+}
+function openModal(id) {
+  const p = state.products.find(x => x.id === id);
+  if (!p) return;
+  state.cur = p;
+  fill(p);
+  $('overlay').hidden = false;
+  document.body.classList.add('lock');
+}
+function closeModal(force) {
+  if (!force && !$('overlay').hidden && isDirty() && !confirm('Discard your unsaved changes?')) return;
+  $('overlay').hidden = true;
+  document.body.classList.remove('lock');
+  state.cur = null;
+}
+async function save() {
+  if (!state.cur || state.saving) return;
+  const f = getForm();
+  if ($('fType').value === OTHER && !f.type) return toast('Please type your category name', true);
+  if (!f.type) return toast('Please select a Type', true);
+  if ([f.price, f.discount, f.cost].some(n => !isFinite(n) || n < 0)) return toast('Price, Discount and Cost must be 0 or more', true);
+  if (state.mode === 'percent' && f.discount > 100) return toast('Discount % cannot be more than 100', true);
+
+  state.saving = true;
+  const btn = $('saveBtn');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+  try {
+    const res = await api('update', {
+      id: state.cur.id,
+      fields: { Type: f.type, Description: f.description, Price: f.price, Discount: f.discount, Cost: f.cost, Sts: f.sts }
+    });
+    const i = state.products.findIndex(x => x.id === res.product.id);
+    if (i > -1) state.products[i] = res.product;
+    state.types = res.types || state.types;
+    state.cur = res.product;
+    renderChips();
+    renderGrid();
+    fill(res.product);
+    toast('Saved to sheet ✓');
+  } catch (e) {
+    toast(e.message || 'Could not save', true);
+  } finally {
+    state.saving = false;
+    btn.textContent = 'Save changes';
+    btn.disabled = !isDirty();
+  }
+}
+
+/* ================= Boot helpers ================= */
+async function start() {
+  try {
+    await load(true);
+  } catch (e) {
+    $('grid').innerHTML = '';
+    $('count').textContent = '';
+    toast(e.message || 'Could not connect', true);
+  }
+}
+
+/* ================= Events ================= */
+$('refreshBtn').onclick = async () => {
+  try { await load(true); toast('Refreshed'); } catch (e) { toast(e.message, true); }
+};
+$('search').addEventListener('input', e => { state.q = e.target.value; renderGrid(); });
+$('stsFilter').addEventListener('change', e => { state.sts = e.target.value; renderGrid(); });
+$('closeBtn').onclick = () => closeModal(false);
+$('cancelBtn').onclick = () => closeModal(false);
+$('overlay').addEventListener('mousedown', e => { if (e.target === $('overlay')) closeModal(false); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('overlay').hidden) closeModal(false); });
+$('fType').addEventListener('change', () => {
+  const other = $('fType').value === OTHER;
+  $('fTypeCustom').hidden = !other;
+  if (other) $('fTypeCustom').focus();
+  updateCalc();
+});
+['fTypeCustom', 'fDesc', 'fPrice', 'fDisc', 'fCost', 'fSts'].forEach(id => {
+  $(id).addEventListener('input', updateCalc);
+  $(id).addEventListener('change', updateCalc);
+});
+$('saveBtn').onclick = save;
+
+/* Boot */
+$('logo').src = CONFIG.LOGO;
+if (!CONFIG.API_URL || CONFIG.API_URL.indexOf('PASTE_') === 0) {
+  $('setupMsg').hidden = false;
+  $('appView').hidden = true;
+} else {
+  start();
+}
+</script>
+</body>
+</html>
