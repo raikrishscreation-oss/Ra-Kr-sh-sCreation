@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0b3d29">
+<title>Find Invoice – RaiKrish's Collection</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+:root{--green:#0b3d29;--green2:#145a3d;--gold:#c9a24b;--cream:#fbf7ef;--ink:#1f2a24;--muted:#6b7a72;--line:#e6dfcf}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Poppins',system-ui,sans-serif;background:#efe9db;color:var(--ink);font-size:14px}
+h1,h2,h3{font-family:'Playfair Display',Georgia,serif;margin:0}
+.topbar{background:linear-gradient(90deg,var(--green),var(--green2));color:#fff;padding:12px 16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:20;border-bottom:3px solid var(--gold)}
+.topbar img{width:40px;height:40px;border-radius:50%;background:#fff;object-fit:cover}
+.topbar h1{font-size:18px;font-weight:600}
+.topbar small{opacity:.75;display:block;font-family:'Poppins';font-size:11px}
+.wrap{max-width:900px;margin:0 auto;padding:14px}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px;box-shadow:0 2px 8px rgba(11,61,41,.05)}
+.card h2{font-size:17px;color:var(--green);margin-bottom:10px}
+.srow{display:flex;gap:8px}
+input{flex:1;min-width:0;padding:12px;border:1px solid #d6cfbd;border-radius:10px;font:inherit;font-size:16px;background:#fff;color:var(--ink)}
+input:focus{outline:2px solid var(--gold);border-color:var(--gold)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:10px;padding:12px 16px;font:500 14px 'Poppins';cursor:pointer;background:var(--green);color:#fff}
+.btn:hover{background:var(--green2)}
+.btn.gold{background:var(--gold);color:#2b2105}
+.btn:disabled{opacity:.6;cursor:wait}
+.hint{font-size:12px;color:var(--muted);margin-top:8px}
+.status{font-size:12px;margin-top:8px;color:var(--muted)}
+.status.ok{color:#1b7a4b}.status.err{color:#c0392b}
+.res{display:block;width:100%;text-align:left;background:var(--cream);border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:10px;padding:10px 12px;margin-bottom:8px;cursor:pointer;font:inherit;color:inherit}
+.res.on{border-color:var(--green);background:#eef6f0}
+.res .a{display:flex;justify-content:space-between;gap:8px;font-weight:600;color:var(--green)}
+.res .b{font-size:12.5px;margin-top:3px}
+.res .c{font-size:11.5px;color:var(--muted);margin-top:2px}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px}
+.actions .btn{flex:1;min-width:130px}
+.preview-wrap{overflow:hidden;position:relative;background:#d9d2c0;border-radius:10px}
+#sheetHost{transform-origin:top left;width:794px}
+
+/* ===== invoice sheet (A4) – same as invoice generator ===== */
+/* To get the paper background back: copy the  background:#fffaf0 url("data:image/...")  value from your old invoice file into .sheet below */
+.sheet{width:794px;min-height:1123px;background:#fffaf0;color:#1f2a24;font-family:'Poppins',sans-serif;font-size:13px;display:flex;flex-direction:column;position:relative;overflow:hidden}
+.sheet .band,.sheet .body,.sheet .foot{position:relative;z-index:1}
+.sheet .band{color:#5b6b62;padding:66px 76px 14px;display:flex;align-items:center;gap:16px}
+.sheet .band img{width:74px;height:74px;border-radius:50%;background:#fff;object-fit:cover;border:3px solid var(--gold)}
+.sheet .band .brand h2{font-size:26px;color:var(--green);letter-spacing:.4px}
+.sheet .band .brand p{margin:4px 0 0;font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:#a07f2c}
+.sheet .band .tag{margin-left:auto;text-align:right}
+.sheet .band .tag h3{font-size:30px;color:var(--gold);letter-spacing:5px;font-weight:700}
+.sheet .band .tag span{display:block;font-size:11px;opacity:.85;margin-top:2px}
+.sheet .goldline{height:3px;margin:0 76px;background:var(--gold);position:relative;z-index:1}
+.sheet .body{padding:22px 76px 10px;flex:1}
+.sheet .meta{display:flex;justify-content:space-between;gap:18px;margin-bottom:22px}
+.sheet .box{flex:1;background:rgba(251,247,239,.85);border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:8px;padding:12px 15px}
+.sheet .box h4{margin:0 0 7px;font-size:10.5px;letter-spacing:1.6px;text-transform:uppercase;color:#a07f2c;font-weight:600}
+.sheet .box p{margin:3px 0;line-height:1.5}
+.sheet .box .nm{font-weight:600;font-size:16px;color:var(--green)}
+.sheet .box i{color:var(--gold);width:18px}
+.sheet table.it{width:100%;border-collapse:separate;border-spacing:0;margin-bottom:18px;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.sheet table.it th{background:var(--green);color:#fff;text-align:left;padding:10px;font-size:11.5px;font-weight:500;letter-spacing:.5px;text-transform:uppercase}
+.sheet table.it th.r,.sheet table.it td.r{text-align:right}
+.sheet table.it td{padding:10px;border-bottom:1px solid var(--line);vertical-align:top;background:rgba(255,255,255,.55)}
+.sheet table.it tbody tr:nth-child(even) td{background:rgba(251,247,239,.8)}
+.sheet table.it tr{page-break-inside:avoid;break-inside:avoid}
+.sheet table.it td small{display:block;color:var(--muted);font-size:10.5px;margin-top:2px}
+.sheet .sum{display:flex;justify-content:flex-end}
+.sheet .sum table{min-width:280px;border-collapse:collapse;border-radius:8px;overflow:hidden}
+.sheet .sum td{padding:7px 12px;background:rgba(251,247,239,.85)}
+.sheet .sum td:last-child{text-align:right;font-weight:500}
+.sheet .sum tr.gt td{background:var(--green);color:#fff;font-weight:600;font-size:16px;padding:10px 12px}
+.sheet .sum tr.gt td:last-child{color:#f0d588}
+.sheet .sum tr.dc td{color:#b3261e;font-weight:600}
+.sheet .sum tr.sv td{background:none;text-align:right;font-size:11.5px;color:#0b6b3f;font-weight:600;padding:6px 2px 0}
+.sheet .foot{margin:auto 76px 0;padding:14px 24px 84px;border-top:3px solid var(--gold);display:flex;gap:24px;align-items:center;page-break-inside:avoid;break-inside:avoid}
+.sheet .qr{width:150px;text-align:center;flex:none}
+.sheet .qr .q{width:150px;height:150px;border:2px solid var(--gold);border-radius:12px;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:4px}
+.sheet .qr .q img{width:100%;height:100%;object-fit:contain}
+.sheet .qr b{display:block;margin-top:7px;font-size:13px;color:var(--green);letter-spacing:.6px}
+.sheet .contact{flex:1;line-height:1.85}
+.sheet .contact .thx{font-family:'Playfair Display',serif;font-size:20px;color:var(--green);margin-bottom:5px}
+.sheet .contact i{width:22px;color:var(--gold)}
+.sheet .contact .small{font-size:10.5px;color:var(--muted);line-height:1.5;margin-top:7px;border-top:1px dashed #d8cdb0;padding-top:6px}
+
+@page{size:A4;margin:0}
+@media print{
+  html,body{background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .no-print{display:none!important}
+  .wrap{padding:0;max-width:none}
+  .card.pv{border:0;box-shadow:none;padding:0;margin:0;background:none}
+  .preview-wrap{height:auto!important;background:none;overflow:visible}
+  #sheetHost{transform:none!important;width:210mm}
+  .sheet{width:210mm;min-height:296mm}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar no-print">
+  <img id="topLogo" alt="logo">
+  <div><h1>RaiKrish's Collection</h1><small>Find Invoice</small></div>
+</div>
+
+<div class="wrap">
+  <div class="card no-print">
+    <h2><i class="fa-solid fa-magnifying-glass"></i> Search invoice</h2>
+    <div class="srow">
+      <input id="q" placeholder="Invoice no / Order ID / Name / Phone" autocomplete="off" enterkeyhint="search">
+      <button class="btn" id="go"><i class="fa-solid fa-magnifying-glass"></i></button>
+    </div>
+    <div class="hint">Examples: RKC26005 &nbsp;·&nbsp; 26005 &nbsp;·&nbsp; RK-261011-003 &nbsp;·&nbsp; 9876543210 &nbsp;·&nbsp; customer name</div>
+    <div class="status" id="status"></div>
+  </div>
+
+  <div class="card no-print" id="resCard" style="display:none">
+    <h2><i class="fa-solid fa-list"></i> Invoices found <span id="rcount" style="font-size:13px;color:var(--muted);font-family:Poppins"></span></h2>
+    <div id="results"></div>
+  </div>
+
+  <div id="invArea" style="display:none">
+    <div class="actions no-print">
+      <button class="btn" id="btnPdf"><i class="fa-solid fa-file-pdf"></i> Download PDF</button>
+      <button class="btn gold" id="btnPrint"><i class="fa-solid fa-print"></i> Print</button>
+    </div>
+    <div class="card pv">
+      <div class="preview-wrap" id="pvWrap"><div id="sheetHost"></div></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
+/* ================= CONFIG ================= */
+// Paste your NEW Apps Script Web App URL (ends with /exec)
+const API_URL = 'https://script.google.com/macros/s/AKfycbwuYVjxEo9tdleam4Oitdyet7r7jS6KwgZL99xV6Ca3Ozzz0xhQSZpwf1wOzKTlRJrd/exec';
+
+const LOGO_URL = 'https://drive.google.com/thumbnail?id=1zqOu2NPiGQ4MZT6rxNwbzn_7csTxUQpD&sz=s800';
+const SITE = 'raikrishcolection.arnetworkhouse.in';
+const PHONE = '7602268369', INSTA = 'raikrishs_collection', MAIL = 'raikrishscreation@gmail.com';
+
+/* ================= HELPERS ================= */
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const inr = n => '₹' + Math.round(n || 0).toLocaleString('en-IN');
+const lsGet = (k, d) => { try { const v = localStorage.getItem(k); return v === null ? d : v; } catch (e) { return d; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
+function say(msg, cls) { const s = $('status'); s.className = 'status ' + (cls || ''); s.textContent = msg; }
+
+let pin = lsGet('rkc_lookup_pin', '');
+let logoSrc = lsGet('rkc_logo_data', '') || LOGO_URL;
+let qrSrc = lsGet('rkc_qr_data', '');
+let cur = null;
+$('topLogo').src = LOGO_URL;
+
+async function api(params, retried) {
+  if (!API_URL) throw new Error('API_URL is empty – paste the Apps Script URL in the file');
+  const u = API_URL + '?' + new URLSearchParams(Object.assign({}, params, { pin: pin, _: Date.now() }));
+  const r = await (await fetch(u)).json();
+  if (r.auth === false && !retried) {
+    const p = prompt('Enter PIN');
+    if (p === null) throw new Error('PIN required');
+    pin = p.trim(); lsSet('rkc_lookup_pin', pin);
+    return api(params, true);
+  }
+  if (r.auth === false) { pin = ''; lsSet('rkc_lookup_pin', ''); }
+  return r;
+}
+
+/* logo / QR as data URLs so the PDF always includes them */
+api({ action: 'assets' }).then(r => {
+  if (!r.ok) return;
+  if (r.logo) { logoSrc = r.logo; lsSet('rkc_logo_data', r.logo); }
+  if (r.qr) { qrSrc = r.qr; lsSet('rkc_qr_data', r.qr); }
+  if (cur) renderDoc();
+}).catch(() => {});
+
+/* ================= SEARCH ================= */
+async function doSearch() {
+  const q = $('q').value.trim();
+  if (!q) { say('Type something to search', 'err'); return; }
+  $('go').disabled = true; say('Searching…');
+  try {
+    const r = await api({ action: 'search', q: q });
+    if (!r.ok) throw new Error(r.error || 'Error');
+    showResults(r.results);
+  } catch (e) { say(e.message, 'err'); }
+  $('go').disabled = false;
+}
+function showResults(list) {
+  $('resCard').style.display = list.length ? '' : 'none';
+  $('rcount').textContent = list.length ? `(${list.length})` : '';
+  if (!list.length) { say('No invoice found', 'err'); $('invArea').style.display = 'none'; cur = null; return; }
+  say(`${list.length} invoice${list.length > 1 ? 's' : ''} found`, 'ok');
+  $('results').innerHTML = list.map(x => `
+    <button class="res" data-no="${esc(x.invoiceNo)}">
+      <div class="a"><span>${esc(x.invoiceNo)}</span><span>${inr(x.total)}</span></div>
+      <div class="b">${esc(x.name)}${x.phone ? ' · ' + esc(x.phone) : ''}</div>
+      <div class="c">${esc(x.date)}${x.orderId ? ' · Order ' + esc(x.orderId) : ''}</div>
+    </button>`).join('');
+  if (list.length === 1) openInvoice(list[0].invoiceNo);
+}
+$('results').addEventListener('click', e => {
+  const b = e.target.closest('.res'); if (b) openInvoice(b.dataset.no);
+});
+async function openInvoice(no) {
+  document.querySelectorAll('.res').forEach(b => b.classList.toggle('on', b.dataset.no === no));
+  say('Loading ' + no + '…');
+  try {
+    const r = await api({ action: 'invoice', no: no });
+    if (!r.ok) throw new Error(r.error || 'Error');
+    cur = r.invoice; renderDoc();
+    $('invArea').style.display = '';
+    fit(); say('Showing ' + no, 'ok');
+    $('invArea').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } catch (e) { say(e.message, 'err'); }
+}
+$('go').onclick = doSearch;
+$('q').addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
+
+/* ================= INVOICE DOCUMENT ================= */
+function docHTML(v) {
+  const rows = v.items.map((i, n) => `
+    <tr><td>${n + 1}</td>
+      <td><b>${esc(i.name)}</b>${(i.pid || i.desc) ? `<small>${esc(i.pid)}${i.desc ? (i.pid ? ' · ' : '') + esc(String(i.desc).slice(0, 90)) : ''}</small>` : ''}</td>
+      <td class="r">${i.qty}</td><td class="r">${inr(i.rate)}</td><td class="r">${inr(i.amount)}</td></tr>`).join('');
+  const addr = esc(v.address).replace(/\n/g, '<br>');
+  return `
+  <div class="sheet">
+    <div class="band">
+      <img src="${esc(logoSrc)}" crossorigin="anonymous" alt="">
+      <div class="brand"><h2>RaiKrish's Collection</h2><p>Where Creativity Meets Craft</p></div>
+      <div class="tag"><h3>INVOICE</h3><span>${esc(v.invoiceNo)}</span>${v.orderId ? `<span>Order ID: ${esc(v.orderId)}</span>` : ''}</div>
+    </div>
+    <div class="goldline"></div>
+    <div class="body">
+      <div class="meta">
+        <div class="box"><h4>Billed to</h4>
+          <p class="nm">${esc(v.name) || '—'}</p>
+          <p><i class="fa-solid fa-phone"></i>${esc(v.phone) || '—'}</p>
+          ${v.email ? `<p><i class="fa-solid fa-envelope"></i>${esc(v.email)}</p>` : ''}
+          ${addr ? `<p><i class="fa-solid fa-location-dot"></i>${addr}</p>` : ''}
+        </div>
+        <div class="box" style="flex:0 0 245px"><h4>Invoice details</h4>
+          <p><span style="color:#6b7a72">Invoice no</span><br><b style="font-size:15px;color:#0b3d29">${esc(v.invoiceNo)}</b></p>
+          ${v.orderId ? `<p><span style="color:#6b7a72">Order ID</span><br><b>${esc(v.orderId)}</b></p>` : ''}
+          <p><span style="color:#6b7a72">Date</span><br>${esc(v.date)}</p>
+        </div>
+      </div>
+      <table class="it">
+        <thead><tr><th style="width:36px">#</th><th>Item</th><th class="r" style="width:56px">Qty</th><th class="r" style="width:100px">Price</th><th class="r" style="width:110px">Amount</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <div class="sum"><table>
+        <tr><td>Subtotal</td><td>${inr(v.sub)}</td></tr>
+        ${v.disc > 0 ? `<tr class="dc"><td>Discount (${v.pct}%)</td><td>- ${inr(v.disc)}</td></tr>` : ''}
+        <tr><td>Delivery charge</td><td>${inr(v.del)}</td></tr>
+        <tr class="gt"><td>Total</td><td>${inr(v.grand)}</td></tr>
+        ${v.disc > 0 ? `<tr class="sv"><td colspan="2">You saved ${inr(v.disc)} (${v.pct}% off)</td></tr>` : ''}
+      </table></div>
+    </div>
+    <div class="foot">
+      <div class="qr"><div class="q">${qrSrc ? `<img src="${esc(qrSrc)}" alt="QR">` : `<img src="${esc(logoSrc)}" crossorigin="anonymous" alt="QR">`}</div><b>Scan &amp; Pay</b></div>
+      <div class="contact">
+        <div class="thx">Thank you for supporting handmade!</div>
+        <div><i class="fa-brands fa-whatsapp"></i>${PHONE} (Call / WhatsApp)</div>
+        <div><i class="fa-brands fa-instagram"></i>${INSTA}</div>
+        <div><i class="fa-solid fa-envelope"></i>${MAIL}</div>
+        <div><i class="fa-solid fa-globe"></i>${SITE}</div>
+        <div class="small">Online payment only · Delivery charge is paid before dispatch · Handmade items may vary slightly in shade.</div>
+      </div>
+    </div>
+  </div>`;
+}
+function renderDoc() { if (!cur) return; $('sheetHost').innerHTML = docHTML(cur); fit(); }
+function fit() {
+  const w = $('pvWrap').clientWidth, host = $('sheetHost'), s = Math.min(1, w / 794);
+  host.style.transform = `scale(${s})`; $('pvWrap').style.height = (host.offsetHeight * s) + 'px';
+}
+window.addEventListener('resize', fit);
+
+/* ================= PRINT / PDF ================= */
+$('btnPrint').onclick = () => { if (cur) window.print(); };
+$('btnPdf').onclick = async () => {
+  if (!cur) return;
+  const b = $('btnPdf'); b.disabled = true; say('Creating PDF…');
+  const holder = document.createElement('div');
+  holder.style.cssText = 'position:fixed;left:-10000px;top:0;width:794px;background:#fff';
+  holder.innerHTML = docHTML(cur); document.body.appendChild(holder);
+  const sh = holder.firstElementChild;
+  sh.style.minHeight = '1118px';
+  sh.style.wordSpacing = '1.5px';
+  sh.style.textRendering = 'geometricPrecision';
+  try {
+    if (document.fonts && document.fonts.ready) await document.fonts.ready;
+    const name = cur.invoiceNo + '_' + (cur.name.replace(/[^\w]+/g, '_') || 'customer') + '.pdf';
+    await html2pdf().set({
+      margin: 0, filename: name, image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', scrollX: 0, scrollY: 0 },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      pagebreak: { mode: ['css'], avoid: ['tr', '.foot'] }
+    }).from(sh).save();
+    say('PDF saved: ' + name, 'ok');
+  } catch (e) { say('PDF failed: ' + e.message, 'err'); }
+  finally { holder.remove(); b.disabled = false; }
+};
+
+/* ================= INIT ================= */
+if (!API_URL) say('API_URL is empty – paste the Apps Script URL in the file.', 'err');
+const qp = new URLSearchParams(location.search).get('q');
+if (qp) { $('q').value = qp; doSearch(); }
+</script>
+</body>
+</html>
