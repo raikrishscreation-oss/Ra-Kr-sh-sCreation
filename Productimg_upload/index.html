@@ -196,13 +196,13 @@ const b64 = f => new Promise((res, rej) => { const fr = new FileReader(); fr.onl
 
 function localValidate(targets) {
   const seen = {};
-  items.forEach(it => { if (it.status === 'SUCCESS') seen[finalName(it)] = 1; });
+  items.forEach(it => { if (it.status === 'SUCCESS') seen[norm(it.name).toLowerCase()] = 1; });
   targets.forEach(it => {
     if (it.status === 'INVALID_TYPE' || it.status === 'FILE_TOO_LARGE') return;
     const n = norm(it.name), e = nameErr(n);
     if (e) { it.status = 'INVALID_FILENAME'; it.msg = e; return; }
-    const f = finalName(it);
-    if (seen[f]) { it.status = 'DUPLICATE'; it.msg = 'Upload blocked: another selected image uses this name.'; return; }
+    const f = n.toLowerCase();
+    if (seen[f]) { it.status = 'DUPLICATE'; it.msg = 'Upload blocked: another selected image uses this name (any image type).'; return; }
     seen[f] = 1;
     if (it.status === 'INVALID_FILENAME' || it.status === 'DUPLICATE') { it.status = 'READY'; it.msg = ''; }
   });
@@ -219,13 +219,13 @@ async function run(retryOnly) {
   try {
     if (ready.length) {
       let chk;
-      try { chk = await api({ action: 'check', names: ready.map(finalName) }, 60000); }
+      try { chk = await api({ action: 'check', names: ready.map(i => norm(i.name)) }, 60000); }
       catch (e) { chk = { ok: false, error: 'Could not reach the backend. Check your internet and SCRIPT_URL.' }; }
       if (!chk.ok) { ready.forEach(i => { i.status = 'ERROR'; i.msg = chk.error || 'Backend error.'; paint(i); }); ready = []; }
       else {
-        const ex = {}; (chk.exists || []).forEach(n => ex[n] = 1);
+        const ex = {}; (chk.exists || []).forEach(n => ex[String(n).toLowerCase()] = 1);
         ready.forEach(i => {
-          if (!ex[finalName(i)]) return;
+          if (!ex[norm(i.name).toLowerCase()]) return;
           if (i.uncertain) { i.status = 'SUCCESS'; i.msg = 'Confirmed in Drive from the earlier attempt.'; i.uncertain = false; }
           else { i.status = 'DUPLICATE'; i.msg = 'Upload blocked: A file with this name already exists in Google Drive.'; }
           paint(i);
@@ -256,11 +256,11 @@ async function run(retryOnly) {
         if (err && err.backend) batch.forEach(i => { i.status = 'ERROR'; i.msg = err.backend; });
         else {
           let chk = null;
-          try { chk = await api({ action: 'check', names: batch.map(finalName) }, 60000); } catch (e2) {}
-          const ex = {}; if (chk && chk.ok) (chk.exists || []).forEach(n => ex[n] = 1);
+          try { chk = await api({ action: 'check', names: batch.map(i => norm(i.name)) }, 60000); } catch (e2) {}
+          const ex = {}; if (chk && chk.ok) (chk.exists || []).forEach(n => ex[String(n).toLowerCase()] = 1);
           batch.forEach(i => {
             if (chk && chk.ok) {
-              if (ex[finalName(i)]) { i.status = 'SUCCESS'; i.msg = 'Uploaded (confirmed in Drive after a connection error).'; }
+              if (ex[norm(i.name).toLowerCase()]) { i.status = 'SUCCESS'; i.msg = 'Uploaded (confirmed in Drive after a connection error).'; }
               else { i.status = 'ERROR'; i.msg = 'Network error. Not uploaded. Use Retry Failed.'; }
             } else { i.status = 'UNKNOWN'; i.uncertain = true; i.msg = 'Connection lost. Upload status unknown; Retry Failed will check Drive first.'; }
           });
