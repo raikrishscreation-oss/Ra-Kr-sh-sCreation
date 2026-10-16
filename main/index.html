@@ -76,9 +76,10 @@ main{flex:1;width:100%;max-width:980px;margin:0 auto;padding:26px max(16px,env(s
 .hello p{margin:0;color:var(--muted)}
 .tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
 @media (max-width:560px){.tiles{grid-template-columns:1fr}}
+@media (min-width:561px){.tile:last-child:nth-child(odd){grid-column:1/-1}}
 .tile{display:flex;align-items:center;gap:16px;background:#fff;border:1px solid var(--line);border-radius:20px;padding:20px;text-decoration:none;color:var(--ink);
   transition:transform .15s,box-shadow .15s,border-color .15s;position:relative;overflow:hidden;animation:rise .45s ease-out both}
-.tile:nth-child(2){animation-delay:.05s}.tile:nth-child(3){animation-delay:.1s}.tile:nth-child(4){animation-delay:.15s}
+.tile:nth-child(2){animation-delay:.05s}.tile:nth-child(3){animation-delay:.1s}.tile:nth-child(4){animation-delay:.15s}.tile:nth-child(5){animation-delay:.2s}
 .tile::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--gold)}
 .tile:hover{transform:translateY(-4px);box-shadow:0 22px 34px -22px rgba(11,61,41,.6);border-color:var(--gold)}
 .tile:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
@@ -177,8 +178,9 @@ const CONFIG = {
   SALT:    'raikrish-admin'
 };
 
-/* The 4 buttons. Add more objects here any time and they appear automatically. */
+/* The 5 buttons. Add more objects here any time and they appear automatically. */
 const TOOLS = [
+  { title: 'Product Image Upload', desc: 'Upload and manage product images', url: 'https://raikrishscreation-oss.github.io/Raikrish_admin/Productimg_upload/', icon: 'upload' },
   { title: 'Product Manage',    desc: 'Add, edit and organise products',  url: 'https://raikrishscreation-oss.github.io/Raikrish_admin/product_manager/', icon: 'box' },
   { title: 'Invoice Generator', desc: 'Create customer invoices',         url: 'https://raikrishscreation-oss.github.io/Raikrish_admin/invoice/',         icon: 'invoice' },
   { title: 'Order Tracker',     desc: 'Track and update order status',    url: 'https://raikrishscreation-oss.github.io/Raikrish_admin/Orders_details/',  icon: 'truck' },
@@ -199,7 +201,8 @@ const ICONS = {
   box:     '<path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5 12 12l9-4.5M12 12v9"/>',
   invoice: '<path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6M9 16h3"/>',
   truck:   '<path d="M2 6h11v10H2z"/><path d="M13 9h4l4 4v3h-8z"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/>',
-  search:  '<circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/>'
+  search:  '<circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/>',
+  upload:  '<path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/>'
 };
 const svg = (name, extra) => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" ' + (extra || '') + '>' + ICONS[name] + '</svg>';
 const ARROW = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
