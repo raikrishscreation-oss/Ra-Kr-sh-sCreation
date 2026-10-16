@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b3d29">
+<meta name="robots" content="noindex, nofollow">
+<title>Product Image Manager – RaiKrish Collection</title>
+<link rel="icon" href="https://drive.google.com/thumbnail?id=1zqOu2NPiGQ4MZT6rxNwbzn_7csTxUQpD&sz=s800">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{--cream:#faf6ec;--lav:#efe8d2;--lav2:#f8f3e4;--pur:#0b3d29;--pur2:#14573b;--gold:#c9a24b;--gold-soft:#f1e3bd;--ink:#1d2b24;--mut:#6b7a72;--line:#e6dfcd;--ok:#1f7a4d;--bad:#b3361f;--warn:#9a6b0f;
+--serif:'Playfair Display',Georgia,serif;--sans:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+*{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0;font-family:var(--sans);color:var(--ink);background:radial-gradient(800px 400px at 90% -5%,rgba(201,162,75,.2),transparent 60%),radial-gradient(700px 500px at -10% 110%,rgba(20,87,59,.14),transparent 60%),var(--cream);min-height:100vh;line-height:1.45}
+.wrap{max-width:880px;margin:0 auto;padding:calc(20px + env(safe-area-inset-top)) 16px calc(40px + env(safe-area-inset-bottom))}
+header{text-align:center;margin-bottom:20px;background:linear-gradient(160deg,#0b3d29,#14573b);color:#fff;border-radius:22px;padding:24px 16px;border-bottom:4px solid var(--gold);box-shadow:0 22px 40px -26px rgba(11,61,41,.7)}
+header img{width:92px;height:92px;border-radius:50%;object-fit:cover;background:#fff;border:3px solid var(--gold);box-shadow:0 10px 26px -10px rgba(0,0,0,.5)}
+h1{font-family:var(--serif);font-size:clamp(1.8rem,6vw,2.4rem);margin:12px 0 0;color:#fff}
+.sub{font-weight:600;letter-spacing:.14em;text-transform:uppercase;font-size:.74rem;color:var(--gold);margin:4px 0}
+.desc{color:var(--gold-soft);margin:4px 0 0}
+.card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:18px;box-shadow:0 18px 40px -26px rgba(11,61,41,.5);margin-bottom:16px}
+.drop{border:2px dashed var(--gold);background:var(--lav2);border-radius:16px;padding:28px 14px;text-align:center;cursor:pointer;transition:.15s}
+.drop.on{background:var(--lav);border-color:var(--pur)}
+.drop b{display:block;font-family:var(--serif);font-size:1.15rem;color:var(--pur2)}
+.drop small{color:var(--mut)}
+button{font-family:inherit;cursor:pointer}
+.btn{border:1.5px solid var(--pur);background:#fff;color:var(--pur);border-radius:12px;padding:11px 18px;font-weight:600;font-size:.92rem}
+.btn.p{background:var(--pur);color:#fff}.btn.p:hover:not(:disabled){background:var(--pur2)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.bar-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.bar-actions .p{flex:1;min-width:150px}
+.sum{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center}
+.sum div{background:var(--lav2);border-radius:12px;padding:10px 4px}.sum b{display:block;font-size:1.3rem;font-family:var(--serif)}.sum span{font-size:.7rem;color:var(--mut);text-transform:uppercase;letter-spacing:.06em}
+.note{margin:10px 0 0;font-size:.85rem;color:var(--mut);min-height:1.2em}
+.prog{height:8px;background:var(--lav);border-radius:99px;overflow:hidden;margin-top:12px}.prog i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--gold),var(--pur2));transition:width .3s}
+.row{display:grid;grid-template-columns:76px 1fr auto;gap:12px;align-items:start;padding:12px 0;border-top:1px solid var(--line)}
+.row:first-child{border-top:0}
+.row img{width:76px;height:76px;object-fit:cover;border-radius:12px;background:var(--lav)}
+.top{display:flex;gap:8px;font-size:.8rem;color:var(--mut)}.top b{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.nm{display:flex;align-items:center;gap:6px;margin-top:6px}
+.nm input{flex:1;min-width:0;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;font-size:16px;font-family:inherit;color:var(--ink)}
+.nm input:focus{outline:none;border-color:var(--pur);box-shadow:0 0 0 3px rgba(20,87,59,.15)}
+.ext{font-weight:600;color:var(--pur)}
+.fin{font-size:.78rem;color:var(--mut);margin-top:4px;word-break:break-all}
+.msg{font-size:.82rem;margin-top:4px}
+.msg.err{color:var(--bad)}.msg.ok{color:var(--ok)}.msg.warn{color:var(--warn)}
+.rb{height:4px;background:var(--lav);border-radius:9px;margin-top:6px;overflow:hidden}.rb i{display:block;height:100%;width:0;background:var(--pur)}
+.rb.go i{width:40%;animation:sl 1s infinite ease-in-out}.rb.done i{width:100%;background:var(--ok)}
+@keyframes sl{0%{margin-left:-40%}100%{margin-left:100%}}
+.side{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.x{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:#fff;color:var(--mut);font-size:1.2rem;line-height:1}
+.x:hover:not(:disabled){color:var(--bad);border-color:var(--bad)}
+.badge{font-size:.62rem;font-weight:700;letter-spacing:.05em;padding:3px 8px;border-radius:99px;background:var(--gold-soft);color:#6d5313;white-space:nowrap}
+.badge.SUCCESS{background:#dff5ea;color:var(--ok)}.badge.DUPLICATE,.badge.UNKNOWN{background:#fff0c9;color:var(--warn)}
+.badge.ERROR,.badge.INVALID_FILENAME,.badge.INVALID_TYPE,.badge.FILE_TOO_LARGE{background:#fbe3e0;color:var(--bad)}
+.empty{text-align:center;color:var(--mut);padding:18px 0 6px}
+.cfg{background:#fdf0d5;border:1px solid #e9c97b;border-radius:12px;padding:12px;margin-bottom:14px;font-size:.88rem}
+@media(max-width:480px){.row{grid-template-columns:60px 1fr auto}.row img{width:60px;height:60px}.sum b{font-size:1.1rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <img id="logo" alt="RaiKrish Collection logo">
+  <h1>RaiKrish Collection</h1>
+  <div class="sub">Product Image Manager</div>
+  <p class="desc">Upload and organize your handmade product images.</p>
+</header>
+
+<div class="cfg" id="cfg" hidden><b>Setup needed:</b> paste your Apps Script Web App URL into <code>SCRIPT_URL</code> in this file.</div>
+
+<div class="card">
+  <div class="drop" id="drop" tabindex="0" role="button" aria-label="Select images">
+    <b>Drag &amp; drop images here</b>
+    <small>or tap to browse · JPG, JPEG, PNG, WEBP · max <span id="maxmb"></span> MB each</small>
+  </div>
+  <input id="file" type="file" multiple accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" hidden>
+  <div class="bar-actions">
+    <button class="btn" id="pick">Select Images</button>
+    <button class="btn" id="clear" disabled>Clear All</button>
+    <button class="btn" id="retry" disabled>Retry Failed</button>
+    <button class="btn p" id="up" disabled>Upload All</button>
+  </div>
+</div>
+
+<div class="card" id="listCard" hidden>
+  <div class="sum">
+    <div><b id="sSel">0</b><span>Selected</span></div><div><b id="sOk">0</b><span>Uploaded</span></div>
+    <div><b id="sDup">0</b><span>Duplicates</span></div><div><b id="sBad">0</b><span>Failed</span></div>
+  </div>
+  <div class="prog" id="prog" hidden><i id="progI"></i></div>
+  <p class="note" id="note"></p>
+  <div id="list"></div>
+</div>
+</div>
+
+<script>
+/* ===== CONFIG ===== */
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwI7CPIuCFLlKhNs9Qz1EbgXUKRdTxX1rnyVvxQjCXLGNycsdf7jrxmZFurg6VsZBAz/exec";
+const MAX_MB = 5;                       // keep equal to MAX_FILE_MB in Code.gs
+const BATCH_FILES = 3;                  // images per request
+const BATCH_BYTES = 8 * 1024 * 1024;    // max raw bytes per request
+const LOGO = "https://drive.google.com/thumbnail?id=1zqOu2NPiGQ4MZT6rxNwbzn_7csTxUQpD&sz=s800";
+/* ================== */
+const EXT = { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp' };
+const $ = s => document.querySelector(s);
+const CONFIG_OK = SCRIPT_URL.indexOf('PASTE_') !== 0;
+let items = [], busy = false, seq = 0;
+
+const norm = s => String(s || '').replace(/\s+/g, ' ').trim();
+const fmt = b => b < 1048576 ? Math.max(1, Math.round(b / 1024)) + ' KB' : (b / 1048576).toFixed(2) + ' MB';
+function nameErr(n) {
+  if (!n) return 'Filename is required.';
+  if (n.length > 100) return 'Filename is too long (max 100 characters).';
+  if (/[\\\/:*?"<>|\x00-\x1f]/.test(n)) return 'Remove these characters: \\ / : * ? " < > |';
+  if (n[0] === '.' || n.slice(-1) === '.') return 'Filename cannot start or end with a dot.';
+  return '';
+}
+const finalName = it => norm(it.name) + '.' + it.ext;
+const RESET = ['DUPLICATE', 'INVALID_FILENAME', 'ERROR'];
+const MSG = { SUCCESS: 'ok', DUPLICATE: 'warn', UNKNOWN: 'warn' };
+
+function addFiles(list) {
+  [...list].forEach(f => {
+    const m = /\.([A-Za-z0-9]+)$/.exec(f.name);
+    const it = { id: 'i' + (++seq), file: f, ext: m ? m[1].toLowerCase() : '', name: '', status: 'READY', msg: '', uncertain: false, url: URL.createObjectURL(f) };
+    if (!EXT[it.ext] || (f.type && Object.values(EXT).indexOf(f.type) < 0)) { it.status = 'INVALID_TYPE'; it.msg = 'Unsupported file type. Use JPG, JPEG, PNG or WEBP.'; }
+    else if (f.size > MAX_MB * 1048576) { it.status = 'FILE_TOO_LARGE'; it.msg = 'File is larger than ' + MAX_MB + ' MB.'; }
+    else if (f.size === 0) { it.status = 'INVALID_TYPE'; it.msg = 'File is empty.'; }
+    items.push(it);
+  });
+  render();
+}
+
+function render() {
+  const list = $('#list'); list.innerHTML = '';
+  items.forEach(it => {
+    const r = document.createElement('div'); r.className = 'row';
+    r.innerHTML = '<img alt=""><div><div class="top"><b class="on"></b><span class="sz"></span></div>' +
+      '<div class="nm"><input maxlength="100" placeholder="New filename (no extension)" autocomplete="off"><span class="ext"></span></div>' +
+      '<div class="fin"></div><div class="rb"><i></i></div><div class="msg"></div></div>' +
+      '<div class="side"><button class="x" aria-label="Remove image">×</button><span class="badge"></span></div>';
+    r.querySelector('img').src = it.url;
+    r.querySelector('.on').textContent = it.file.name;
+    r.querySelector('.sz').textContent = fmt(it.file.size);
+    r.querySelector('.ext').textContent = '.' + it.ext;
+    const inp = r.querySelector('input'); inp.value = it.name;
+    inp.addEventListener('input', () => {
+      it.name = inp.value;
+      if (RESET.indexOf(it.status) > -1 || it.status === 'UNKNOWN' && false) { it.status = 'READY'; it.msg = ''; }
+      it.uncertain = it.status === 'UNKNOWN' ? it.uncertain : false;
+      paint(it); stats();
+    });
+    r.querySelector('.x').onclick = () => { if (busy) return; URL.revokeObjectURL(it.url); items = items.filter(x => x !== it); render(); };
+    it.el = r; paint(it); list.appendChild(r);
+  });
+  $('#listCard').hidden = !items.length;
+  stats();
+}
+
+function paint(it) {
+  const r = it.el; if (!r) return;
+  const fixed = it.status === 'INVALID_TYPE' || it.status === 'FILE_TOO_LARGE';
+  const inp = r.querySelector('input');
+  inp.disabled = busy || it.status === 'SUCCESS' || fixed;
+  r.querySelector('.x').disabled = busy;
+  const live = norm(it.name), e = live ? nameErr(live) : '';
+  r.querySelector('.fin').textContent = fixed ? '' : (e ? '' : (live ? 'Final filename: ' + finalName(it) : 'Enter a filename to continue.'));
+  const b = r.querySelector('.badge'); b.className = 'badge ' + it.status; b.textContent = it.status === 'READY' ? 'READY' : it.status.replace(/_/g, ' ');
+  const m = r.querySelector('.msg');
+  const text = it.msg || e; m.textContent = text;
+  m.className = 'msg ' + (it.msg ? (MSG[it.status] || 'err') : (e ? 'err' : ''));
+  const rb = r.querySelector('.rb'); rb.className = 'rb' + (it.status === 'UPLOADING' ? ' go' : it.status === 'SUCCESS' ? ' done' : '');
+}
+
+function stats() {
+  const c = s => items.filter(i => s.indexOf(i.status) > -1).length;
+  const ok = c(['SUCCESS']), dup = c(['DUPLICATE']), bad = c(['ERROR', 'UNKNOWN', 'INVALID_FILENAME', 'INVALID_TYPE', 'FILE_TOO_LARGE']);
+  $('#sSel').textContent = items.length; $('#sOk').textContent = ok; $('#sDup').textContent = dup; $('#sBad').textContent = bad;
+  $('#up').disabled = busy || !CONFIG_OK || !items.some(i => i.status !== 'SUCCESS');
+  $('#retry').disabled = busy || !CONFIG_OK || !items.some(i => i.status === 'ERROR' || i.status === 'UNKNOWN');
+  $('#clear').disabled = busy || !items.length;
+}
+const setNote = t => { $('#note').textContent = t; };
+const setProg = p => { $('#prog').hidden = p == null; if (p != null) $('#progI').style.width = p + '%'; };
+
+async function api(obj, ms) {
+  const c = new AbortController(), t = setTimeout(() => c.abort(), ms || 150000);
+  try {
+    const r = await fetch(SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(obj), signal: c.signal });
+    return await r.json();
+  } finally { clearTimeout(t); }
+}
+const b64 = f => new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(String(fr.result).split(',')[1]); fr.onerror = () => rej(fr.error); fr.readAsDataURL(f); });
+
+function localValidate(targets) {
+  const seen = {};
+  items.forEach(it => { if (it.status === 'SUCCESS') seen[finalName(it)] = 1; });
+  targets.forEach(it => {
+    if (it.status === 'INVALID_TYPE' || it.status === 'FILE_TOO_LARGE') return;
+    const n = norm(it.name), e = nameErr(n);
+    if (e) { it.status = 'INVALID_FILENAME'; it.msg = e; return; }
+    const f = finalName(it);
+    if (seen[f]) { it.status = 'DUPLICATE'; it.msg = 'Upload blocked: another selected image uses this name.'; return; }
+    seen[f] = 1;
+    if (it.status === 'INVALID_FILENAME' || it.status === 'DUPLICATE') { it.status = 'READY'; it.msg = ''; }
+  });
+}
+
+async function run(retryOnly) {
+  if (busy || !CONFIG_OK) return;
+  const targets = items.filter(i => retryOnly ? (i.status === 'ERROR' || i.status === 'UNKNOWN') : i.status !== 'SUCCESS');
+  busy = true; items.forEach(paint); stats();
+  localValidate(targets);
+  let ready = targets.filter(i => ['READY', 'ERROR', 'UNKNOWN'].indexOf(i.status) > -1);
+  targets.forEach(paint);
+  setNote('Checking ' + ready.length + ' file name(s) in Google Drive…'); setProg(0);
+  try {
+    if (ready.length) {
+      let chk;
+      try { chk = await api({ action: 'check', names: ready.map(finalName) }, 60000); }
+      catch (e) { chk = { ok: false, error: 'Could not reach the backend. Check your internet and SCRIPT_URL.' }; }
+      if (!chk.ok) { ready.forEach(i => { i.status = 'ERROR'; i.msg = chk.error || 'Backend error.'; paint(i); }); ready = []; }
+      else {
+        const ex = {}; (chk.exists || []).forEach(n => ex[n] = 1);
+        ready.forEach(i => {
+          if (!ex[finalName(i)]) return;
+          if (i.uncertain) { i.status = 'SUCCESS'; i.msg = 'Confirmed in Drive from the earlier attempt.'; i.uncertain = false; }
+          else { i.status = 'DUPLICATE'; i.msg = 'Upload blocked: A file with this name already exists in Google Drive.'; }
+          paint(i);
+        });
+        ready = ready.filter(i => i.status !== 'SUCCESS' && i.status !== 'DUPLICATE');
+      }
+    }
+    const blocked = targets.length - ready.length;
+    setNote('Uploading ' + ready.length + ' image(s). ' + (blocked ? blocked + ' blocked or already done.' : ''));
+    const batches = []; let cur = [], bytes = 0;
+    ready.forEach(i => { if (cur.length && (cur.length >= BATCH_FILES || bytes + i.file.size > BATCH_BYTES)) { batches.push(cur); cur = []; bytes = 0; } cur.push(i); bytes += i.file.size; });
+    if (cur.length) batches.push(cur);
+    let done = 0;
+    for (const batch of batches) {
+      batch.forEach(i => { i.status = 'UPLOADING'; i.msg = ''; paint(i); });
+      try {
+        const files = [];
+        for (const i of batch) files.push({ id: i.id, name: norm(i.name), originalName: i.file.name, mime: i.file.type, data: await b64(i.file) });
+        const res = await api({ action: 'upload', files });
+        if (!res.ok) throw { backend: res.error || 'Backend error.' };
+        const map = {}; (res.results || []).forEach(x => map[x.id] = x);
+        batch.forEach(i => {
+          const x = map[i.id];
+          if (!x) { i.status = 'ERROR'; i.msg = 'No response for this file. Use Retry Failed.'; }
+          else { i.status = x.status; i.msg = x.message || ''; i.uncertain = false; }
+        });
+      } catch (err) {
+        if (err && err.backend) batch.forEach(i => { i.status = 'ERROR'; i.msg = err.backend; });
+        else {
+          let chk = null;
+          try { chk = await api({ action: 'check', names: batch.map(finalName) }, 60000); } catch (e2) {}
+          const ex = {}; if (chk && chk.ok) (chk.exists || []).forEach(n => ex[n] = 1);
+          batch.forEach(i => {
+            if (chk && chk.ok) {
+              if (ex[finalName(i)]) { i.status = 'SUCCESS'; i.msg = 'Uploaded (confirmed in Drive after a connection error).'; }
+              else { i.status = 'ERROR'; i.msg = 'Network error. Not uploaded. Use Retry Failed.'; }
+            } else { i.status = 'UNKNOWN'; i.uncertain = true; i.msg = 'Connection lost. Upload status unknown; Retry Failed will check Drive first.'; }
+          });
+        }
+      }
+      batch.forEach(paint); done += batch.length; setProg(Math.round(done / ready.length * 100)); stats();
+    }
+    const s = n => items.filter(i => i.status === n).length;
+    setNote('Finished. Uploaded: ' + s('SUCCESS') + ' · Duplicates: ' + s('DUPLICATE') + ' · Failed: ' + items.filter(i => ['ERROR', 'UNKNOWN', 'INVALID_FILENAME', 'INVALID_TYPE', 'FILE_TOO_LARGE'].indexOf(i.status) > -1).length + '. Rename duplicates and press Upload All to retry them.');
+  } finally { busy = false; items.forEach(paint); stats(); setTimeout(() => { if (!busy) setProg(null); }, 2500); }
+}
+
+/* ===== events ===== */
+const fileIn = $('#file'), drop = $('#drop');
+$('#pick').onclick = () => fileIn.click();
+drop.onclick = () => fileIn.click();
+drop.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileIn.click(); } };
+fileIn.onchange = () => { addFiles(fileIn.files); fileIn.value = ''; };
+['dragenter', 'dragover'].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.add('on'); }));
+['dragleave', 'drop'].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.remove('on'); }));
+drop.addEventListener('drop', e => addFiles(e.dataTransfer.files));
+['dragover', 'drop'].forEach(t => window.addEventListener(t, e => e.preventDefault()));
+$('#clear').onclick = () => { if (busy) return; items.forEach(i => URL.revokeObjectURL(i.url)); items = []; setNote(''); setProg(null); render(); };
+$('#up').onclick = () => run(false);
+$('#retry').onclick = () => run(true);
+window.addEventListener('beforeunload', e => { if (busy) { e.preventDefault(); e.returnValue = ''; } });
+
+$('#logo').src = LOGO; $('#maxmb').textContent = MAX_MB;
+if (!CONFIG_OK) $('#cfg').hidden = false;
+stats();
+</script>
+</body>
+</html>
