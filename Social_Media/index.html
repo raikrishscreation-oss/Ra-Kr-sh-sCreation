@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0b3d29">
+<title>RaiKrish's Collection – Post Manager</title>
+<link rel="icon" href="https://drive.google.com/thumbnail?id=1zqOu2NPiGQ4MZT6rxNwbzn_7csTxUQpD&sz=s64">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --green:#0b3d29; --green-2:#14573c; --cream:#f7f2e4; --card:#fffdf6;
+  --gold:#b98f2e; --ink:#1c2a22; --muted:#6b7a70; --line:#e3dcc6;
+  --err:#a63a2b; --ok:#1f7a4d; --r:14px;
+}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+body{font-family:Nunito,system-ui,sans-serif;background:var(--cream);color:var(--ink);line-height:1.45;-webkit-tap-highlight-color:transparent}
+h1,h2{font-family:'Cormorant Garamond',Georgia,serif;font-weight:700;color:var(--green)}
+[hidden]{display:none!important}
+.muted{color:var(--muted)} .small{font-size:.85rem} .center{text-align:center;padding:1.5rem 1rem}
+.err{color:var(--err);font-weight:600;font-size:.92rem}
+button{font:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+
+/* buttons */
+.btn{border:0;border-radius:999px;padding:.65rem 1.2rem;font-weight:700;transition:transform .12s,opacity .2s,background .2s}
+.btn:active{transform:scale(.97)}
+.btn.primary{background:var(--green);color:#fff}
+.btn.primary:hover{background:var(--green-2)}
+.btn.primary.big{width:100%;padding:.9rem;font-size:1.05rem;margin-top:.9rem}
+.btn.ghost{background:transparent;color:var(--green);border:1.5px solid var(--green)}
+.btn.light{background:rgba(255,255,255,.95);color:var(--green)}
+.btn[disabled]{opacity:.55;cursor:not-allowed}
+.btn.busy::after,.spin{content:"";display:inline-block;width:1em;height:1em;margin-left:.6em;vertical-align:-.15em;border:2.5px solid currentColor;border-right-color:transparent;border-radius:50%;animation:sp .7s linear infinite}
+.spin{margin:0;width:2rem;height:2rem;color:var(--gold)}
+@keyframes sp{to{transform:rotate(360deg)}}
+.icon-btn{width:40px;height:40px;border-radius:50%;border:1.5px solid rgba(255,255,255,.45);background:transparent;color:#fff;font-size:1.2rem}
+.icon-btn.spinning{animation:sp .8s linear infinite}
+
+/* header + tabs */
+.top{position:sticky;top:0;z-index:5;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:.6rem 1rem;border-bottom:3px solid var(--gold)}
+.brand{display:flex;align-items:center;gap:.6rem;font-family:'Cormorant Garamond',serif;font-weight:700;font-size:1.25rem}
+.brand img{width:38px;height:38px;border-radius:50%;object-fit:cover;background:#fff}
+.top-actions{display:flex;gap:.5rem}
+.tabs{display:flex;max-width:960px;margin:1rem auto 0;padding:0 1rem;gap:.5rem}
+.tab{flex:1;padding:.7rem;border-radius:12px;border:1.5px solid var(--line);background:var(--card);color:var(--muted);font-weight:700;transition:all .2s}
+.tab.active{background:var(--green);border-color:var(--green);color:#fff}
+
+/* grid + cards */
+.wrap{max-width:960px;margin:0 auto;padding:1rem}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.7rem}
+@media(min-width:640px){.grid{grid-template-columns:repeat(3,1fr);gap:1rem}}
+@media(min-width:960px){.grid{grid-template-columns:repeat(4,1fr)}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;cursor:pointer;display:flex;flex-direction:column;transition:box-shadow .2s,transform .2s;animation:pop .25s ease both}
+.card:hover{box-shadow:0 6px 18px rgba(11,61,41,.15);transform:translateY(-2px)}
+@keyframes pop{from{opacity:0;transform:scale(.97)}}
+.thumb{position:relative;aspect-ratio:1/1;background:#ece6d2 center/cover}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.thumb .ph{position:absolute;inset:0;display:grid;place-items:center;font-size:.8rem;color:var(--muted);text-align:center;padding:.4rem}
+.badge{position:absolute;top:6px;right:6px;background:var(--green);color:#fff;border-radius:999px;font-size:.72rem;font-weight:700;padding:.15rem .55rem}
+.badge.pend{background:var(--gold)}
+.info{padding:.55rem .65rem .7rem;display:grid;gap:.15rem}
+.info b{font-size:.92rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.info span{font-size:.78rem;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.info em{font-style:normal;font-size:.76rem;color:var(--green);font-weight:700}
+.skeleton{aspect-ratio:3/4;border-radius:var(--r);background:linear-gradient(90deg,#ece6d2,#f6f1e1,#ece6d2);background-size:200% 100%;animation:sh 1.2s infinite}
+@keyframes sh{to{background-position:-200% 0}}
+
+/* detail screen */
+.screen{position:fixed;inset:0;z-index:20;background:var(--cream);overflow-y:auto;animation:slide .22s ease}
+@keyframes slide{from{transform:translateX(24px);opacity:0}}
+.screen-bar{position:sticky;top:0;background:var(--green);color:#fff;display:flex;align-items:center;gap:1rem;padding:.6rem 1rem;z-index:2}
+.screen-bar .btn.ghost{color:#fff;border-color:#fff}
+.screen-body{max-width:640px;margin:0 auto;padding:1rem 1rem 3rem;display:grid;gap:.5rem}
+.d-img,.m-img{position:relative;border-radius:var(--r);overflow:hidden;background:#ece6d2;min-height:180px;display:grid;place-items:center;cursor:zoom-in}
+.d-img img,.m-img img{width:100%;max-height:60vh;object-fit:contain;display:block}
+.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin:.4rem 0}
+.facts div{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:.5rem .6rem}
+.facts dt{font-size:.72rem;color:var(--muted)} .facts dd{font-weight:700;font-size:.9rem;word-break:break-word}
+.lbl{font-weight:700;margin-top:.4rem}
+.img-err{display:grid;gap:.6rem;place-items:center;padding:1.5rem;text-align:center;color:var(--err);font-weight:600}
+
+/* overlays */
+.overlay{position:fixed;inset:0;z-index:30;background:rgba(11,61,41,.72);display:grid;place-items:center;padding:1rem;animation:fade .2s}
+.overlay.dark{background:#000;z-index:40;padding:0}
+@keyframes fade{from{opacity:0}}
+.medium-card{background:var(--card);border-radius:18px;padding:1rem;width:min(520px,100%);max-height:92vh;overflow:auto;display:grid;gap:.7rem}
+.medium-card .btn.ghost{justify-self:start}
+#fullBack{position:absolute;top:max(.8rem,env(safe-area-inset-top));left:.8rem;z-index:2}
+.full-box{width:100%;height:100%;display:grid;place-items:center;color:#fff}
+.full-box img{max-width:100%;max-height:100%;object-fit:contain}
+.full-box .img-err{color:#ffb4a8}
+
+/* toast */
+.toast{position:fixed;left:50%;bottom:1.2rem;transform:translate(-50%,150%);background:var(--ink);color:#fff;padding:.7rem 1.1rem;border-radius:12px;z-index:60;max-width:90vw;transition:transform .25s;font-weight:600}
+.toast.show{transform:translate(-50%,0)} .toast.ok{background:var(--ok)} .toast.bad{background:var(--err)}
+
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<!-- App -->
+<div id="app">
+  <header class="top">
+    <div class="brand">
+      <img src="https://drive.google.com/thumbnail?id=1zqOu2NPiGQ4MZT6rxNwbzn_7csTxUQpD&sz=s200" alt="">
+      <span>RaiKrish's Collection</span>
+    </div>
+    <div class="top-actions">
+      <button class="icon-btn" id="refreshBtn" aria-label="Refresh posts" title="Refresh">&#8635;</button>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab active" role="tab" data-tab="pending" id="tabPending">Pending (0)</button>
+    <button class="tab" role="tab" data-tab="posted" id="tabPosted">Posted (0)</button>
+  </nav>
+
+  <section id="list" class="wrap">
+    <div id="grid" class="grid"></div>
+    <p id="empty" class="muted center" hidden></p>
+    <p id="listErr" class="err center" hidden></p>
+  </section>
+</div>
+
+<!-- Detail screen -->
+<section id="detail" class="screen" hidden>
+  <div class="screen-bar">
+    <button class="btn ghost" id="detailBack">&larr; Back</button>
+    <strong id="dTitleBar">Post</strong>
+  </div>
+  <div class="screen-body">
+    <div class="d-img" id="dImgBox"><img id="dImg" alt=""></div>
+    <h2 id="dName"></h2>
+    <p id="dDesc" class="muted"></p>
+    <dl class="facts">
+      <div><dt>Status</dt><dd id="dStatus"></dd></div>
+      <div><dt>Posted</dt><dd id="dCount"></dd></div>
+      <div><dt>Last posted</dt><dd id="dLast"></dd></div>
+    </dl>
+    <p id="dErr" class="err" hidden></p>
+    <label for="dCaption" class="lbl">Caption</label>
+    <textarea id="dCaption" rows="7" placeholder="Write the caption for this post"></textarea>
+    <button class="btn primary big" id="postBtn">Post</button>
+  </div>
+</section>
+
+<!-- Medium preview -->
+<div id="medium" class="overlay" hidden>
+  <div class="medium-card">
+    <button class="btn ghost" id="mediumBack">&larr; Back</button>
+    <div class="m-img"><img id="mImg" alt=""></div>
+    <p class="muted center small">Tap image for full screen</p>
+    <strong id="mName"></strong>
+    <button class="btn primary" id="mDetails">Open details</button>
+  </div>
+</div>
+
+<!-- Full viewer -->
+<div id="full" class="overlay dark" hidden>
+  <button class="btn light" id="fullBack">&larr; Back</button>
+  <div id="fullBox" class="full-box"></div>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ===== CONFIG: paste your Apps Script Web App URL (ends with /exec). No secrets here. ===== */
+const API_URL = 'https://script.google.com/macros/s/AKfycbzP2c3BHjCK99tQ63qABOn1zyJ5tbQaKI-vy9RCmeCKyUABgtPjkswPADp5Ou1WyrU/exec';
+/* ========================================================================================= */
+
+const $ = (id) => document.getElementById(id);
+let posts = [];
+let tab = 'pending';
+let selId = null;                 // selected post row id
+const drafts = new Map();         // row id -> caption being edited (survives navigation)
+const busy = new Set();           // row ids currently posting
+const fullCache = new Map();      // row id -> original image data URL
+
+/* ---------- API ---------- */
+async function api(action, data = {}) {
+  if (!API_URL || API_URL.startsWith('PASTE_')) throw new Error('API_URL not set in script.js');
+  // No Content-Type header => "text/plain" simple request => no CORS preflight (Apps Script can't answer OPTIONS).
+  const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action, ...data }) });
+  let json;
+  try { json = await res.json(); } catch (e) { throw new Error('Bad response from server. Check deployment access is "Anyone".'); }
+  if (!json.ok) throw new Error(json.error || 'Request failed');
+  return json;
+}
+
+/* ---------- helpers ---------- */
+function toast(msg, type = '') {
+  const t = $('toast'); t.textContent = msg; t.className = 'toast show ' + type;
+  clearTimeout(toast.t); toast.t = setTimeout(() => (t.className = 'toast'), 4200);
+}
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const byId = (id) => posts.find((p) => p.id === id);
+const caption = (p) => (drafts.has(p.id) ? drafts.get(p.id) : p.caption);
+
+/* ---------- list ---------- */
+function startApp() {
+  history.replaceState({ v: 'list', d: 0 }, '');
+  load();
+}
+async function load() {
+  const btn = $('refreshBtn'); btn.classList.add('spinning');
+  $('listErr').hidden = true;
+  if (!posts.length) $('grid').innerHTML = '<div class="skeleton"></div>'.repeat(6);
+  try {
+    const r = await api('list');
+    posts = r.posts;
+  } catch (err) {
+    $('grid').innerHTML = ''; $('listErr').hidden = false;
+    $('listErr').innerHTML = esc(err.message) + '<br><button class="btn ghost" id="retryList">Retry</button>';
+    $('retryList').onclick = load; btn.classList.remove('spinning'); return;
+  }
+  btn.classList.remove('spinning');
+  render();
+}
+$('refreshBtn').onclick = load;
+document.querySelectorAll('.tab').forEach((t) => (t.onclick = () => { tab = t.dataset.tab; render(); }));
+
+function render() {
+  const pend = posts.filter((p) => p.status !== 'posted'), done = posts.filter((p) => p.status === 'posted');
+  $('tabPending').textContent = `Pending (${pend.length})`;
+  $('tabPosted').textContent = `Posted (${done.length})`;
+  document.querySelectorAll('.tab').forEach((t) => {
+    const on = t.dataset.tab === tab; t.classList.toggle('active', on); t.setAttribute('aria-selected', on);
+  });
+  const list = tab === 'pending' ? pend : done;
+  $('empty').hidden = list.length > 0;
+  $('empty').textContent = tab === 'pending' ? 'No pending posts. Add new rows in the sheet, then tap refresh.' : 'Nothing posted yet.';
+  $('grid').innerHTML = list.map((p) => `
+    <article class="card" data-id="${p.id}" tabindex="0">
+      <div class="thumb" data-thumb="${p.id}">
+        <img src="${esc(p.link)}" alt="${esc(p.name)}" loading="lazy" referrerpolicy="no-referrer">
+        <span class="badge ${p.status === 'posted' ? '' : 'pend'}">${p.status === 'posted' ? 'Posted' : 'Pending'}</span>
+      </div>
+      <div class="info"><b>${esc(p.name || 'Untitled')}</b>
+        ${p.desc ? `<span>${esc(p.desc)}</span>` : ''}
+        ${caption(p) ? `<span>${esc(caption(p))}</span>` : ''}
+        <em>Posted ${p.count}×</em></div>
+    </article>`).join('');
+  $('grid').querySelectorAll('.thumb img').forEach((img) => {
+    img.onerror = () => { img.remove(); }; // placeholder text shown below
+  });
+  $('grid').querySelectorAll('.thumb').forEach((t) => {
+    if (!t.querySelector('img')) return;
+    t.querySelector('img').addEventListener('error', () => t.insertAdjacentHTML('afterbegin', '<span class="ph">Image unavailable</span>'));
+  });
+}
+$('grid').addEventListener('click', (e) => {
+  const card = e.target.closest('.card'); if (!card) return;
+  const id = +card.dataset.id;
+  if (e.target.closest('.thumb')) openMedium(id); else openDetail(id);
+});
+$('grid').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && e.target.classList.contains('card')) openDetail(+e.target.dataset.id);
+});
+
+/* ---------- navigation (history so phone Back steps back one stage) ---------- */
+function go(state) { history.pushState(state, ''); apply(state); }
+window.addEventListener('popstate', (e) => apply(e.state || { v: 'list', d: 0 }));
+function apply(s) {
+  $('detail').hidden = !s.d;
+  $('medium').hidden = s.v !== 'medium';
+  $('full').hidden = s.v !== 'full';
+  if (s.v === 'list') { selId = null; render(); }
+  document.body.style.overflow = s.v === 'list' ? '' : 'hidden';
+}
+function closeAll() { ['detail', 'medium', 'full'].forEach((i) => ($(i).hidden = true)); document.body.style.overflow = ''; }
+const back = () => history.back();
+['detailBack', 'mediumBack', 'fullBack'].forEach((i) => ($(i).onclick = back));
+$('medium').addEventListener('click', (e) => { if (e.target === $('medium')) back(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && history.state && history.state.v !== 'list') back(); });
+
+function openDetail(id) { selId = id; fillDetail(); go({ v: 'detail', d: 1 }); }
+function openMedium(id) { selId = id; const p = byId(id); showImg($('mImg'), p); $('mName').textContent = p.name; go({ v: 'medium', d: 0 }); }
+$('mDetails').onclick = () => { fillDetail(); history.replaceState({ v: 'detail', d: 1 }, ''); apply({ v: 'detail', d: 1 }); };
+$('mImg').onclick = openFull;
+$('dImg').onclick = openFull;
+
+/* ---------- images ---------- */
+function showImg(img, p, retry) {
+  const box = img.parentElement; box.querySelector('.img-err')?.remove(); img.hidden = false;
+  img.onerror = () => {
+    img.hidden = true;
+    box.insertAdjacentHTML('beforeend', '<div class="img-err">Could not load image from Google Drive. Check the file is shared.<button class="btn ghost">Retry</button></div>');
+    box.querySelector('.img-err button').onclick = (ev) => { ev.stopPropagation(); showImg(img, p, true); };
+  };
+  img.src = p.link.replace(/sz=s\d+/, 'sz=s1000') + (retry ? '&r=' + Date.now() : '');
+  img.alt = p.name;
+}
+async function openFull() {
+  const p = byId(selId); if (!p) return;
+  const s = history.state || {};
+  go({ v: 'full', d: s.d || 0 });
+  await loadFull(p);
+}
+async function loadFull(p) {
+  const box = $('fullBox');
+  if (fullCache.has(p.id)) { box.innerHTML = `<img src="${fullCache.get(p.id)}" alt="${esc(p.name)}">`; return; }
+  box.innerHTML = '<span class="spin"></span>';
+  try {
+    const r = await api('image', { row: p.id });
+    fullCache.set(p.id, r.dataUrl);
+    if (selId === p.id) box.innerHTML = `<img src="${r.dataUrl}" alt="${esc(p.name)}">`;
+  } catch (err) {
+    box.innerHTML = `<div class="img-err">${esc(err.message)}<button class="btn light">Retry</button></div>`;
+    box.querySelector('button').onclick = () => loadFull(p);
+  }
+}
+
+/* ---------- detail + post ---------- */
+function fillDetail() {
+  const p = byId(selId); if (!p) return;
+  $('dTitleBar').textContent = p.status === 'posted' ? 'Posted' : 'Pending';
+  $('dName').textContent = p.name || 'Untitled';
+  $('dDesc').textContent = p.desc || 'No description';
+  $('dStatus').textContent = p.status === 'posted' ? 'Posted' : 'Pending';
+  $('dCount').textContent = p.count + (p.count === 1 ? ' time' : ' times');
+  $('dLast').textContent = p.lastPosted || '–';
+  $('dErr').hidden = !p.error; $('dErr').textContent = p.error ? 'Last attempt: ' + p.error : '';
+  $('dCaption').value = caption(p);
+  const b = $('postBtn'); b.textContent = p.status === 'posted' ? 'Repost' : 'Post';
+  setBusy(busy.has(p.id));
+  showImg($('dImg'), p);
+}
+function setBusy(on) { const b = $('postBtn'); b.disabled = on; b.classList.toggle('busy', on); }
+$('dCaption').addEventListener('input', () => { if (selId != null) drafts.set(selId, $('dCaption').value); });
+
+$('postBtn').onclick = async () => {
+  const p = byId(selId); if (!p || busy.has(p.id)) return;
+  const text = $('dCaption').value.trim();
+  if (!text) { toast('Write a caption first.', 'bad'); $('dCaption').focus(); return; }
+  const verb = p.status === 'posted' ? 'Repost' : 'Post';
+  if (!confirm(`${verb} "${p.name}" to Instagram now?`)) return;
+  busy.add(p.id); setBusy(true);
+  try {
+    const r = await api('post', { row: p.id, caption: text });
+    Object.assign(p, r.post); drafts.delete(p.id); fullCache.delete(p.id);
+    toast(r.warning ? r.warning : `${verb === 'Post' ? 'Posted' : 'Reposted'} successfully.`, 'ok');
+  } catch (err) {
+    toast(err.message, 'bad');
+    p.error = err.message; // caption + status untouched
+  }
+  busy.delete(p.id);
+  if (selId === p.id) fillDetail();
+  render();
+};
+
+/* ---------- boot ---------- */
+startApp();
+</script>
+</body>
+</html>
